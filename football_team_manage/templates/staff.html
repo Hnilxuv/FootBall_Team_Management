@@ -15,7 +15,7 @@
         {% endif %}
         {% endwith %}
 
-<h2>Manage <b>Register User</b>  <a href="/Registeruser/Insert" class="btn btn-success float-right" >Add New Register User</a> </h2>
+<h2>Manage <b>Staff</b>  <a href="/Staff/Insert" class="btn btn-success float-right" >Add New Register User</a> </h2>
 <table class="table">
     <tr class="table_header">
 
@@ -36,8 +36,8 @@
         <td>{{row['role_name']}}</td>
         <td>{{row['status']}}</td>
         <td>
-            <a href="/Registeruser/Update/{{row['id']}}" class="btn btn-warning btn-xs">Edit</a>
-            <a href="/Registeruser/Delete/{{row['id']}}" class="btn btn-danger btn-xs"
+            <a href="/Staff/Update/{{row['id']}}" class="btn btn-warning btn-xs">Edit</a>
+            <a href="/Staff/Delete/{{row['id']}}" class="btn btn-danger btn-xs"
                onclick="return confirm('Are You Sure To Delete ?')">Delete</a>
         </td>
     </tr>

@@ -1,6 +1,8 @@
 from functools import wraps
 import jwt
 from flask import request, url_for, make_response, redirect
+from werkzeug.exceptions import abort
+
 from football_team_manage import app
 from football_team_manage.models.models import User
 
@@ -30,9 +32,8 @@ def has_permission(roles):
         @wraps(f)
         def decorator(current_user, *args, **kwargs):
             if current_user.roles.name not in roles:
-                return '404 not found', 404
-            return f(*args, **kwargs)
-
+                abort(404)
+            return f(current_user, *args, **kwargs)
         return decorator
 
     return roles_required

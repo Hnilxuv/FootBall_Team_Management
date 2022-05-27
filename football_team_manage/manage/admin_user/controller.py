@@ -18,7 +18,11 @@ def get_all():
 
 
 def get(id):
-    data = request.form.to_dict()
+    content_type = request.headers.get('Content-Type')
+    if content_type == 'application/json':
+        data = request.get_json()
+    else:
+        data = request.form.to_dict()
     role_check = Roles.query.filter_by(name='admin').first()
     user = User.query.filter_by(id=id, role_id=role_check.id).first()
     if user:
@@ -35,7 +39,11 @@ def get(id):
 
 def update(id, current_user):
     try:
-        data = request.form
+        content_type = request.headers.get('Content-Type')
+        if content_type == 'application/json':
+            data = request.get_json()
+        else:
+            data = request.form
         role_check = Roles.query.filter_by(name='admin').first()
         user = User.query.filter_by(id=id, role_id=role_check.id).first()
         user_change = User.query.filter_by(user_name=data['username']).first()
@@ -85,7 +93,11 @@ def update(id, current_user):
 
 def add():
     try:
-        data = request.get_json()
+        content_type = request.headers.get('Content-Type')
+        if content_type == 'application/json':
+            data = request.get_json()
+        else:
+            data = request.form
         username = data['username']
         password = data['password']
         password_hash = generate_password_hash(password)

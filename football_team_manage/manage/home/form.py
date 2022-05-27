@@ -1,9 +1,7 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, SubmitField, BooleanField, HiddenField
-from wtforms.validators import Length, Email, EqualTo, Regexp, ValidationError, DataRequired
+from wtforms import StringField, SubmitField
+from wtforms.validators import Length, Email, EqualTo, Regexp, DataRequired
 from wtforms.widgets import PasswordInput
-
-from football_team_manage.models.models import User
 
 
 class UpdateAccountForm(FlaskForm):

@@ -9,5 +9,3 @@ app.config["SQLALCHEMY_DATABASE_URI"] = "mysql+pymysql://root:vudinhlinh@localho
 app.config["SQlALCHEMY_TRACK_MODIFICATIONS"] = True
 
 db = SQLAlchemy(app=app)
-
-admin = Admin(app=app, name='Football Team Management', template_mode='bootstrap4')

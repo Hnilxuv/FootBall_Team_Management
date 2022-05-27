@@ -7,7 +7,7 @@ def validate_update_data(data):
               'name': {'type': 'string', 'empty': False, 'minlength': 2, 'maxlength': 50},
               'id': {'type': 'string', 'empty': False},
               'email': {'type': 'string', 'empty': False, 'maxlength': 50,
-                        'regex': r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'},
+                        'regex': r'\b[A-Za-z0-9_%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'},
               'phone': {'type': 'string', 'empty': False, 'regex': r'[0-9]{11}'},
               'role_name': {'type': 'string', 'empty': False},
               'status': {'type': 'string', 'empty': False},
@@ -30,7 +30,7 @@ def validate_insert_data(data):
                         'regex': r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{1,}\b'},
               'phone': {'type': 'string', 'empty': False, 'regex': r'[0-9]{11}'},
               'role_name': {'type': 'string', 'empty': False},
-              'status': {'type': 'string', 'empty': False},
+              'status': {'type': 'boolean', 'empty': False},
               'submit': {'type': 'string'},
               'csrf_token': {'type': 'string'}}
     v = Validator(schema)

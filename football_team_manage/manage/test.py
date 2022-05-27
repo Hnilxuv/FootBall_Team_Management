@@ -4,7 +4,7 @@ from football_team_manage.manage.home.controller import get_account_info, change
 import football_team_manage.manage.manager_user.controller as mu
 import football_team_manage.manage.register_user.controller as ru
 import football_team_manage.manage.admin_user.controller as au
-import football_team_manage.manage.staff_user.controller as su
+import football_team_manage.manage.staff.controller as su
 import football_team_manage.manage.league.controller as ml
 import football_team_manage.manage.position.controller as mp
 import football_team_manage.manage.player.controller as mpl
@@ -14,24 +14,24 @@ from football_team_manage.manage.token_required import token_required, has_permi
 test = Blueprint('test', __name__)
 
 
-# @test.errorhandler(400)
-# def handle_400_error(_error):
-#     return make_response(jsonify({'error': 'not found'}), 400)
-#
-#
-# @test.errorhandler(404)
-# def handle_404_error(_error):
-#     return make_response(jsonify({'error': 'not found'}), 404)
-#
-#
-# @test.errorhandler(500)
-# def handle_500_error(_error):
-#     return make_response(jsonify({'error': 'something went wrong'}), 500)
-#
-#
-# @test.errorhandler(405)
-# def handle_405_error(_error):
-#     return make_response(jsonify({'error': 'invalid method'}), 405)
+@test.errorhandler(400)
+def handle_400_error(_error):
+    return make_response(jsonify({'error': 'not found'}), 400)
+
+
+@test.errorhandler(404)
+def handle_404_error(_error):
+    return make_response(jsonify({'error': 'not found'}), 404)
+
+
+@test.errorhandler(500)
+def handle_500_error(_error):
+    return make_response(jsonify({'error': 'something went wrong'}), 500)
+
+
+@test.errorhandler(405)
+def handle_405_error(_error):
+    return make_response(jsonify({'error': 'invalid method'}), 405)
 
 
 @test.route('/test/register', methods=['GET', 'POST'])
@@ -69,7 +69,7 @@ def change_account_password(current_user):
 @test.route('/test/manager', methods=['GET'])
 @token_required
 @has_permission(["admin"])
-def get_all_manager_user():
+def get_all_manager_user(current_user):
     list = mu.get_all()
     if list:
         return list
@@ -80,7 +80,7 @@ def get_all_manager_user():
 @test.route('/test/manager/update/<int:id>', methods=['GET', 'POST'])
 @token_required
 @has_permission(["admin"])
-def update_manager_user(id):
+def update_manager_user(current_id, id):
     if request.method == 'POST':
         return mu.update(id)
     else:
@@ -90,14 +90,14 @@ def update_manager_user(id):
 @test.route('/test/manager/delete/<int:id>', methods=['GET', 'POST'])
 @token_required
 @has_permission(["admin"])
-def delete_manager_user(id):
+def delete_manager_user(current_user, id):
     return mu.delete(id)
 
 
 @test.route('/test/manager/insert', methods=['POST'])
 @token_required
 @has_permission(["admin"])
-def add_manager_user():
+def add_manager_user(current_user):
     return mu.add()
 
 
@@ -249,10 +249,7 @@ def get_all_league():
 @token_required
 @has_permission(["admin", "manager", "staff"])
 def delete_league(current_user, id):
-    if current_user.roles.name != 'register user':
-        return ml.delete(id)
-    else:
-        return '404 not found', 404
+    return ml.delete(id)
 
 
 @test.route('/test/position/insert', methods=['POST'])

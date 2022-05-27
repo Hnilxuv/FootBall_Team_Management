@@ -11,11 +11,11 @@ class UpdateUserForm(FlaskForm):
     email = StringField('Email', validators=[DataRequired(), Email()])
     phone = StringField('Phone', validators=[DataRequired(), Length(max=11), Regexp(regex=r'^[0-9]{11}')])
     role_name = SelectField('Role Name', choices=[roles.name for roles in Roles.query.all()])
-    status = SelectField('Status', choices=[True, False])
+    status = SelectField('Status', choices=[('True', 'Enable'), ('False', 'Disable')])
     submit = SubmitField('Update')
 
 
-class InsertationForm(FlaskForm):
+class InsertionForm(FlaskForm):
     username = StringField('Username', validators=[DataRequired(), Length(min=2, max=50), Regexp(regex=r'^(?![\s.]+$)[a-zA-Z0-9sq\s.]*$')])
     name = StringField('Name', validators=[DataRequired(), Length(min=2, max=50)])
     email = StringField('Email', validators=[DataRequired(), Email()])
@@ -34,3 +34,13 @@ class InsertationForm(FlaskForm):
         user = User.query.filter_by(email=email.data).first()
         if user:
             raise ValidationError('That email is taken. Please choose a different one.')
+
+
+class UpdateForm(FlaskForm):
+    username = StringField('Username', validators=[DataRequired(), Length(min=2, max=50)])
+    name = StringField('Name', validators=[DataRequired(), Length(min=2, max=50)])
+    email = StringField('Email', validators=[DataRequired(), Email()])
+    phone = StringField('Phone', validators=[DataRequired(), Length(max=11), Regexp(regex=r'^[0-9]{11}')])
+    role_name = StringField('Role Name', render_kw={'readonly': True})
+    status = SelectField('Status', choices=[('True', 'Enable'), ('False', 'Disable')])
+    submit = SubmitField('Update')

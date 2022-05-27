@@ -1,10 +1,10 @@
 {% extends "layout.html" %}
 {% block content %}
-
-<form method="POST" action="" enctype="multipart/form-data">
+<div class="content-section">
+<form method="POST" action="">
     {{ form.hidden_tag() }}
     <fieldset class="form-group">
-        <legend class="border-bottom mb-4">Manager User Info</legend>
+        <legend class="border-bottom mb-4">User Information</legend>
         {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
         {% for category, msg in messages %}
@@ -97,11 +97,9 @@
         </div>
     </fieldset>
     <div class="form-group">
-        {{ form.submit(class="btn btn-outline-info") }}
-        <a class="btn" href="/Manager">Cancel </a>
+        {{ form.submit(class="btn btn-secondary") }}
     </div>
-
 </form>
-
-
+        <button class="btn btn-danger" onclick="history.go(-2)">Cancel</button>
+</div>
 {% endblock content %}

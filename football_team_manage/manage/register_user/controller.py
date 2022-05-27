@@ -18,7 +18,11 @@ def get_all():
 
 
 def get(id):
-    data = request.form.to_dict()
+    content_type = request.headers.get('Content-Type')
+    if content_type == 'application/json':
+        data = request.get_json()
+    else:
+        data = request.form.to_dict()
     role_check = Roles.query.filter_by(name='register user').first()
     user = User.query.filter_by(id=id, role_id=role_check.id).first()
     if user:
@@ -35,7 +39,11 @@ def get(id):
 
 def update(id, current_user):
     try:
-        data = request.form
+        content_type = request.headers.get('Content-Type')
+        if content_type == 'application/json':
+            data = request.get_json()
+        else:
+            data = request.form
         validator = validate_update_data(data)
         role_check = Roles.query.filter_by(name='register user').first()
         user = User.query.filter_by(id=id, role_id=role_check.id).first()
@@ -82,7 +90,7 @@ def update(id, current_user):
                         user.status = status
                         db.session.commit()
                         flash('Update Successfully!', 'success')
-                        return 'Update Successfully!'
+                        return 'Update Successfully!', 200
         else:
             return '404 not found', 404
     except:
@@ -92,7 +100,11 @@ def update(id, current_user):
 
 def add():
     try:
-        data = request.form
+        content_type = request.headers.get('Content-Type')
+        if content_type == 'application/json':
+            data = request.get_json()
+        else:
+            data = request.form
         username = data['username']
         password = data['password']
         password_hash = generate_password_hash(password)
@@ -118,7 +130,7 @@ def add():
             db.session.add(new_user)
             db.session.commit()
             flash('Add successfully!', 'success')
-            return 'Add successfully'
+            return 'Add successfully', 200
         else:
             return 'password confirm invalid'
     except:
@@ -128,13 +140,13 @@ def add():
 
 def delete(id):
     try:
-        role_check = Roles.query.filter_by(name='register_user').first()
+        role_check = Roles.query.filter_by(name='register user').first()
         user = User.query.filter_by(id=id, role_id=role_check.id).first()
         if user:
             db.session.delete(user)
             db.session.commit()
             flash('Delete successfully', 'success')
-            return 'Delete successfully!'
+            return 'Delete successfully!', 200
         else:
             return '404 not found', 404
     except:
