@@ -27,28 +27,30 @@
                 <div class="navbar-nav mr-auto">
                     <a class="nav-item nav-link" href="/">Home</a>
                     {% if user.roles.name == 'register user' %}
-                    <a class="nav-item nav-link" href="/Player">Player</a>
-                    <a class="nav-item nav-link" href="/Position">Position</a>
-                    <a class="nav-item nav-link" href="/League">League</a>
+                    <a class="nav-item nav-link" href="/player">Player</a>
+                    <a class="nav-item nav-link" href="/position">Position</a>
+                    <a class="nav-item nav-link" href="/league">League</a>
 
                     {% elif user.roles.name == 'staff' %}
-                    <a class="nav-item nav-link" href="/Player">Player</a>
-                    <a class="nav-item nav-link" href="/Position">Position</a>
-                    <a class="nav-item nav-link" href="/League">League</a>
+                    <a class="nav-item nav-link" href="/player">Player</a>
+                    <a class="nav-item nav-link" href="/position">Position</a>
+                    <a class="nav-item nav-link" href="/league">League</a>
                     {% elif user.roles.name == 'manager' %}
-                    <a class="nav-item nav-link" href="/Player">Player</a>
-                    <a class="nav-item nav-link" href="/Position">Position</a>
-                    <a class="nav-item nav-link" href="/League">League</a>
-                    <a class="nav-item nav-link" href="/RegisterUser">Register User</a>
-                    <a class="nav-item nav-link" href="/Staff">Staff User</a>
+                    <a class="nav-item nav-link" href="/player">Player</a>
+                    <a class="nav-item nav-link" href="/position">Position</a>
+                    <a class="nav-item nav-link" href="/league">League</a>
+                    <a class="nav-item nav-link" href="/registeruser">Register User</a>
+                    <a class="nav-item nav-link" href="/staff">Staff User</a>
                     {% else %}
-                    <a class="nav-item nav-link" href="/Player">Player</a>
-                    <a class="nav-item nav-link" href="/Position">Position</a>
-                    <a class="nav-item nav-link" href="/League">League</a>
-                    <a class="nav-item nav-link" href="/RegisterUser">Register User</a>
-                    <a class="nav-item nav-link" href="/Staff">Staff</a>
-                    <a class="nav-item nav-link" href="/Manager">Manager</a>
-                    <a class="nav-item nav-link" href="/Admin">Administrator</a>
+                    <a class="nav-item nav-link" href="/player">Player</a>
+                    <a class="nav-item nav-link" href="/position">Position</a>
+                    <a class="nav-item nav-link" href="/league">League</a>
+                    <a class="nav-item nav-link" href="/registeruser">Register User</a>
+                    <a class="nav-item nav-link" href="/staff">Staff</a>
+                    <a class="nav-item nav-link" href="/manager">Manager</a>
+                    <a class="nav-item nav-link" href="/admin">Administrator</a>
+                    <a class="nav-item nav-link" href="/role">Role</a>
+
                     {% endif %}
                 </div>
                 <!-- Navbar Right Side -->
@@ -81,6 +83,5 @@
 <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
-
 </body>
 </html>

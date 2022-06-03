@@ -1,61 +1,32 @@
-from flask import request, flash
-from football_team_manage import db
-from football_team_manage.manage.validator import validate_update_account_info, validate_changepw_data
-from werkzeug.security import generate_password_hash, check_password_hash
-from football_team_manage.models.models import User
+from flask import request, url_for, render_template, redirect
+from football_team_manage.manage.form import ChangePasswordForm, UpdateAccountForm
+from football_team_manage.manage.home.services import change_account_info, get_account_info, change_password
+from football_team_manage.manage.middleware import check_header
 
 
-def get_account_info(current_user):
-    data = request.form.to_dict()
-    data['username'] = current_user.user_name
-    data['email'] = current_user.email
-    data['name'] = current_user.name
-    data['phone'] = current_user.phone
-    data['role_name'] = current_user.roles.name
-    return data
-
-
-def change_account_info(current_user):
-    data = request.form
-    user_change = User.query.filter_by(user_name=current_user.user_name).first()
-    email_change = User.query.filter_by(email=current_user.email).first()
-    validator = validate_update_account_info(data)
-    if validator != True:
-        return validator
-    else:
-        if data['username'] != current_user.user_name:
-            if user_change:
-                flash('That username is taken. Please choose a different one.', 'danger')
-                return 'That username is taken. Please choose a different one.'
-        if data['email'] != current_user.email:
-            if email_change:
-                flash('That email is taken. Please choose a different one.', 'danger')
-                return 'That email is taken. Please choose a different one.'
-            current_user.user_name = data['username']
-            current_user.email = data['email']
-            current_user.phone = data['phone']
-            current_user.name = data['name']
-            db.session.commit()
-            flash('Your account has been updated!', 'success')
-            return 'Your account has bean update!'
-
-
-def change_password(current_user):
-    data = request.form
-    validator = validate_changepw_data(data)
-    if validator != True:
-        return validator
-    else:
-        if check_password_hash(current_user.password, data['old_password']):
-            if data['new_confirm_password'] == data['new_password']:
-                current_user.password = generate_password_hash(data['new_password'])
-                db.session.commit()
-                flash('change password successful!', 'success')
-                return 'change password successful!'
-            else:
-                return 'password confirm invalid'
+def update(current_user):
+    if check_header():
+        if request.method == 'GET':
+            return get_account_info(current_user)
         else:
+            return change_account_info(current_user)
+    else:
+        form = UpdateAccountForm()
+        if form.validate_on_submit():
+            change_account_info(current_user)
+            return redirect(url_for('home.account'))
+        if request.method == 'GET':
+            data = get_account_info(current_user)
+            form = UpdateAccountForm(data=data)
+        return render_template('account/account.html', title='Account', form=form, user=current_user)
 
-            flash('invalid old password, please check old password', 'danger')
-            return 'invalid old password'
 
+def change(current_user):
+    if check_header():
+        return change_password(current_user)
+    else:
+        form = ChangePasswordForm()
+        if form.validate_on_submit():
+            change_password(current_user)
+            return redirect(url_for('home.change_account_password'))
+        return render_template('account/change_password.html', title='Change Password', form=form, user=current_user)

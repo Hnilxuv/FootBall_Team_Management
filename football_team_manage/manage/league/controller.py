@@ -1,85 +1,54 @@
-from flask import request, flash
-from football_team_manage import db
-from football_team_manage.manage.validator import validate_data
-from football_team_manage.models.models import LeagueJoin
+from flask import render_template, url_for, request, redirect
+from football_team_manage.manage.form import EditionForm, InsertionLeagueForm
+from football_team_manage.manage.middleware import check_header
+import football_team_manage.manage.league.services as ml
 
 
-def get_all():
-    leagues = LeagueJoin.query.all()
-    list = {}
-    for item in leagues:
-        league = {'id': item.id, 'name': item.name, 'join_time': item.join_time}
-        list[item.id] = league
-    return list
-
-
-def get(id):
-    data = request.form.to_dict()
-    league = LeagueJoin.query.filter_by(id=id).first()
-    if league:
-        data['name'] = league.name
-        return data
+def get_list(current_user):
+    if check_header():
+        list = ml.get_all()
+        if list:
+            return list
+        else:
+            return 'not found any record'
     else:
-        return 'not found', 404
+        dict = ml.get_all()
+        list = dict.values()
+        return render_template('league/league.html', title='Leagues', data=list, user=current_user)
 
 
-def update(id):
-    try:
-        data = request.form
-        league = LeagueJoin.query.filter_by(id=id).first()
-        league_check = LeagueJoin.query.filter_by(name=data['name']).first()
-        validator = validate_data(data)
-        if league:
-            if validator != True:
-                return validator
-            else:
-                if data['name'] != league.name:
-                    if league_check:
-                        flash('That name is taken. Please choose a different one.', 'danger')
-                        return 'That name is taken. Please choose a different one.'
-                    league.name = data['name']
-                    db.session.commit()
-                    flash('Update Successfully!', 'success')
-                    return 'Update Successfully!'
+def update(current_user, id):
+    if check_header():
+        if request.method == 'GET':
+            return ml.get(id)
         else:
-            return 'not found', 404
-    except:
-        flash('Update unsuccessfully!', 'danger')
-        return 'Update unsuccessfully!'
+            return ml.update(id)
+    else:
+        form = EditionForm()
+        if form.validate_on_submit():
+            ml.update(id)
+            return redirect(url_for('league.update_league', id=id))
+        if request.method == 'GET':
+            data = ml.get(id)
+            form = EditionForm(data=data)
+        return render_template('league/update_league.html', title='Update League', form=form, user=current_user, id=id)
 
 
-def delete(id):
-    try:
-        league = LeagueJoin.query.filter_by(id=id).first()
-        if league:
-            db.session.delete(league)
-            db.session.commit()
-            flash('Delete successfully', 'success')
-            return 'Delete successfully!'
-        else:
-            return '404 not found', 404
-    except:
-        flash('Delete unsuccessfully', 'danger')
-        return 'Delete unsuccessfully!'
+def delete(current_user, id):
+    if check_header():
+        return ml.delete(id)
+    else:
+        ml.delete(id)
+        return redirect(url_for('league.get_all_league'))
 
 
-def add():
-    try:
-        data = request.form
-        name = data['name']
-        league_check = LeagueJoin.query.filter_by(name=data['name']).first()
-        validator = validate_data(data)
-        if validator != True:
-            flash('Add unsuccessfully', 'danger')
-            return validator
-        elif league_check:
-            return 'name is existed'
-        else:
-            league = LeagueJoin(name=name)
-            db.session.add(league)
-            db.session.commit()
-            flash('Add successfully!', 'success')
-            return 'Add successfully'
-    except:
-        flash('Add unsuccessfully', 'danger')
-        return 'Add unsuccessfully'
+def insert(current_user):
+    if check_header():
+        return ml.add()
+    else:
+        form = InsertionLeagueForm()
+        if form.validate_on_submit():
+            if request.method == 'POST':
+                ml.add()
+                return redirect(url_for('league.get_all_league'))
+        return render_template('league/add_league.html', title='Add League', form=form, user=current_user)

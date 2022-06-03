@@ -1,141 +1,67 @@
-from flask import request, flash
-from werkzeug.security import generate_password_hash
-from football_team_manage import db
-from football_team_manage.manage.validator import validate_update_data, validate_insert_data
-from football_team_manage.models.models import Roles, User
+from football_team_manage.manage.form import UpdateUserForm, InsertionUserForm, EditionUserForm
+from football_team_manage.manage.middleware import check_header
+import football_team_manage.manage.staff.services as ms
+from flask import render_template, url_for, request, redirect
 
 
-def get_all():
-    user_role = Roles.query.filter_by(name='staff').first()
-    user_list = User.query.filter_by(role_id=user_role.id).all()
-    list = {}
-    for item in user_list:
-        user = {'id': item.id, 'user_name': item.user_name, 'name': item.name, 'email': item.email,
-                'phone': item.phone, 'created_time': item.created_time, 'status': item.status,
-                'role_name': item.roles.name}
-        list[item.id] = user
-    return list
-
-
-def get(id):
-    data = request.form.to_dict()
-    role_check = Roles.query.filter_by(name='staff').first()
-    user = User.query.filter_by(id=id, role_id=role_check.id).first()
-    if user:
-        data['username'] = user.user_name
-        data['email'] = user.email
-        data['name'] = user.name
-        data['phone'] = user.phone
-        data['role_name'] = user.roles.name
-        data['status'] = user.status
-        return data
+def get_list(current_user):
+    if check_header():
+        list = ms.get_all()
+        if list:
+            return list
+        else:
+            return 'not found any record'
     else:
-        return '404 not found', 404
+        dict = ms.get_all()
+        list = dict.values()
+        return render_template('staff/staff.html', data=list, user=current_user)
 
 
-def update(id, current_user):
-    try:
-        data = request.form
-        validator = validate_update_data(data)
-        role_check = Roles.query.filter_by(name='staff').first()
-        user = User.query.filter_by(id=id, role_id=role_check.id).first()
-        user_change = User.query.filter_by(user_name=data['username']).first()
-        email_change = User.query.filter_by(email=data['email']).first()
-        if user:
-            role = Roles.query.filter_by(name=data['role_name']).first()
-            if validator != True:
-                return validator
-            else:
-                if data['username'] != user.user_name:
-                    if user_change:
-                        flash('That username is taken. Please choose a different one.', 'danger')
-                        return 'That username is taken. Please choose a different one.'
-                if data['email'] != user.email:
-                    if email_change:
-                        flash('That email is taken. Please choose a different one.', 'danger')
-                        return 'That email is taken. Please choose a different one.'
-                if not role:
-                    return 'Invalid role name'
+def update(current_user, id):
+    if check_header():
+        if request.method == 'GET':
+            return ms.get(id)
+        else:
+            return ms.update(id, current_user)
+    else:
+        if current_user.roles.name == 'manager':
+            form = EditionUserForm()
+            if form.validate_on_submit():
+                ms.update(id, current_user)
+                return redirect(url_for('staff.update_staff', id=id))
+            if request.method == 'GET':
+                data = ms.get(id)
+                form = EditionUserForm(data=data)
+            return render_template('staff/update_user.html', title='Update Staff', form=form, user=current_user, id=id)
+        else:
+            form = UpdateUserForm()
+            if form.validate_on_submit():
+                ms.update(id, current_user)
+                if form.role_name.data != 'staff':
+                    return redirect(url_for('staff.get_all_staff'))
                 else:
-                    if data['status'].lower() == 'true':
-                        status = True
-                    elif data['status'].lower() == 'false':
-                        status = False
-                    else:
-                        return 'invalid status'
-                    if current_user.roles.name != 'manager':
-                        user.user_name = data['username']
-                        user.email = data['email']
-                        user.phone = data['phone']
-                        user.name = data['name']
-                        user.role_id = role.id
-                        user.status = status
-                        db.session.commit()
-                        flash('Update Successfully!', 'success')
-                        return 'Update Successfully!'
-                    else:
-                        user.user_name = data['username']
-                        user.email = data['email']
-                        user.phone = data['phone']
-                        user.name = data['name']
-                        user.status = status
-                        db.session.commit()
-                        flash('Update Successfully!', 'success')
-                        return 'Update Successfully!'
-        else:
-            return '404 not found', 404
-    except:
-        flash('Update unsuccessfully!', 'danger')
-        return 'Update unsuccessfully!'
+                    return redirect(url_for('staff.update_staff', id=id))
+            if request.method == 'GET':
+                data = ms.get(id)
+                form = UpdateUserForm(data=data)
+            return render_template('staff/update_user.html', title='Update Staff', form=form, user=current_user, id=id)
 
 
-def add():
-    try:
-        data = request.form
-        username = data['username']
-        password = data['password']
-        password_hash = generate_password_hash(password)
-        password_confirm = data['confirm_password']
-        name = data['name']
-        email = data['email']
-        phone = data['phone']
-        status = True
-        role = Roles.query.filter_by(name='staff').first()
-        user_name = User.query.filter_by(user_name=username).first()
-        user_email = User.query.filter_by(email=email).first()
-        validator = validate_insert_data(data)
-        if validator != True:
-            flash('Add unsuccessfully', 'danger')
-            return validator
-        elif user_name:
-            return 'username is existed'
-        elif user_email:
-            return 'email is existed'
-        elif data['password'] == password_confirm:
-            new_user = User(user_name=username, name=name, password=password_hash, email=email, phone=phone,
-                            role_id=role.id, status=status)
-            db.session.add(new_user)
-            db.session.commit()
-            flash('Add successfully!', 'success')
-            return 'Add successfully'
-        else:
-            return 'password confirm invalid'
-    except:
-        flash('Add unsuccessfully', 'danger')
-        return 'Add unsuccessfully'
+def insert(current_user):
+    if check_header():
+        return ms.add()
+    else:
+        form = InsertionUserForm()
+        if form.validate_on_submit():
+            if request.method == 'POST':
+                ms.add()
+                return redirect(url_for('staff.get_all_staff'))
+        return render_template('staff/add_user.html', form=form, user=current_user)
 
 
 def delete(id):
-    try:
-        role_check = Roles.query.filter_by(name='staff').first()
-        user = User.query.filter_by(id=id, role_id=role_check.id).first()
-        if user:
-            db.session.delete(user)
-            db.session.commit()
-            flash('Delete successfully', 'success')
-            return 'Delete successfully!'
-        else:
-            return '404 not found', 404
-    except:
-        flash('Delete unsuccessfully', 'danger')
-        return 'Delete unsuccessfully!'
+    if check_header():
+        return ms.delete(id)
+    else:
+        ms.delete(id)
+        return redirect(url_for('staff.get_all_staff'))

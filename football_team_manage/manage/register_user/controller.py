@@ -1,154 +1,68 @@
-from flask import request, flash
-from werkzeug.security import generate_password_hash
-from football_team_manage import db
-from football_team_manage.manage.validator import validate_update_data, validate_insert_data
-from football_team_manage.models.models import Roles, User
+from football_team_manage.manage.form import UpdateUserForm, InsertionUserForm, EditionUserForm
+from football_team_manage.manage.middleware import check_header
+import football_team_manage.manage.register_user.services as mru
+from flask import render_template, url_for, request, redirect
 
 
-def get_all():
-    manager_role = Roles.query.filter_by(name='register user').first()
-    manager_list = User.query.filter_by(role_id=manager_role.id).all()
-    list = {}
-    for item in manager_list:
-        manager = {'id': item.id, 'user_name': item.user_name, 'name': item.name, 'email': item.email,
-                   'phone': item.phone, 'created_time': item.created_time, 'status': item.status,
-                   'role_name': item.roles.name}
-        list[item.id] = manager
-    return list
-
-
-def get(id):
-    content_type = request.headers.get('Content-Type')
-    if content_type == 'application/json':
-        data = request.get_json()
-    else:
-        data = request.form.to_dict()
-    role_check = Roles.query.filter_by(name='register user').first()
-    user = User.query.filter_by(id=id, role_id=role_check.id).first()
-    if user:
-        data['username'] = user.user_name
-        data['email'] = user.email
-        data['name'] = user.name
-        data['phone'] = user.phone
-        data['role_name'] = user.roles.name
-        data['status'] = user.status
-        return data
-    else:
-        return '404 not found', 404
-
-
-def update(id, current_user):
-    try:
-        content_type = request.headers.get('Content-Type')
-        if content_type == 'application/json':
-            data = request.get_json()
+def get_list(current_user):
+    if check_header():
+        list = mru.get_all()
+        if list:
+            return list
         else:
-            data = request.form
-        validator = validate_update_data(data)
-        role_check = Roles.query.filter_by(name='register user').first()
-        user = User.query.filter_by(id=id, role_id=role_check.id).first()
-        role = Roles.query.filter_by(name=data['role_name']).first()
-        user_change = User.query.filter_by(user_name=data['username']).first()
-        email_change = User.query.filter_by(user_name=data['email']).first()
-        if user:
-            role = Roles.query.filter_by(name=data['role_name']).first()
-            if validator != True:
-                return validator
-            else:
-                if data['username'] != user.user_name:
-                    if user_change:
-                        flash('That username is taken. Please choose a different one.', 'danger')
-                        return 'That username is taken. Please choose a different one.'
-                if data['email'] != user.email:
-                    if email_change:
-                        flash('That email is taken. Please choose a different one.', 'danger')
-                        return 'That email is taken. Please choose a different one.'
-                if not role:
-                    return 'Invalid role name'
+            return 'not found any record'
+    else:
+        dict = mru.get_all()
+        list = dict.values()
+        return render_template('register_user/register_user.html', data=list, user=current_user)
+
+
+def update(current_user, id):
+    if check_header():
+        if request.method == 'POST':
+            return mru.update(id, current_user)
+        else:
+            return mru.get(id)
+    else:
+        if current_user.roles.name == 'manager':
+            form = EditionUserForm()
+            if form.validate_on_submit():
+                mru.update(id, current_user)
+                return redirect(url_for('register_user.update_register_user', id=id))
+            if request.method == 'GET':
+                data = mru.get(id)
+                form = EditionUserForm(data=data)
+            return render_template('register_user/update_user.html', title='Update Register User', form=form, user=current_user,
+                                   id=id)
+        else:
+            form = UpdateUserForm()
+            if form.validate_on_submit():
+                mru.update(id, current_user)
+                if form.role_name.data != 'register user':
+                    return redirect(url_for('register_user.get_all_register_user'))
                 else:
-                    if data['status'].lower() == 'true':
-                        status = True
-                    elif data['status'].lower() == 'false':
-                        status = False
-                    else:
-                        return 'invalid status'
-                    if current_user.roles.name != 'manager':
-                        user.user_name = data['username']
-                        user.email = data['email']
-                        user.phone = data['phone']
-                        user.name = data['name']
-                        user.role_id = role.id
-                        user.status = status
-                        db.session.commit()
-                        flash('Update Successfully!', 'success')
-                        return 'Update Successfully!'
-                    else:
-                        user.user_name = data['username']
-                        user.email = data['email']
-                        user.phone = data['phone']
-                        user.name = data['name']
-                        user.status = status
-                        db.session.commit()
-                        flash('Update Successfully!', 'success')
-                        return 'Update Successfully!', 200
-        else:
-            return '404 not found', 404
-    except:
-        flash('Update unsuccessfully!', 'danger')
-        return 'Update unsuccessfully!'
+                    return redirect(url_for('register_user.update_register_user', id=id))
+            if request.method == 'GET':
+                data = mru.get(id)
+                form = UpdateUserForm(data=data)
+            return render_template('register_user/update_user.html', title='Update Register User', form=form, user=current_user, id=id)
 
 
-def add():
-    try:
-        content_type = request.headers.get('Content-Type')
-        if content_type == 'application/json':
-            data = request.get_json()
-        else:
-            data = request.form
-        username = data['username']
-        password = data['password']
-        password_hash = generate_password_hash(password)
-        password_confirm = data['confirm_password']
-        name = data['name']
-        email = data['email']
-        phone = data['phone']
-        status = True
-        role = Roles.query.filter_by(name='register user').first()
-        user_name = User.query.filter_by(user_name=username).first()
-        user_email = User.query.filter_by(email=email).first()
-        validator = validate_insert_data(data)
-        if validator != True:
-            flash('Add unsuccessfully', 'danger')
-            return validator
-        elif user_name:
-            return 'username is existed'
-        elif user_email:
-            return 'email is existed'
-        elif data['password'] == password_confirm:
-            new_user = User(user_name=username, name=name, password=password_hash, email=email, phone=phone,
-                            role_id=role.id, status=status)
-            db.session.add(new_user)
-            db.session.commit()
-            flash('Add successfully!', 'success')
-            return 'Add successfully', 200
-        else:
-            return 'password confirm invalid'
-    except:
-        flash('Add unsuccessfully', 'danger')
-        return 'Add unsuccessfully'
+def insert(current_user):
+    if check_header():
+        return mru.add()
+    else:
+        form = InsertionUserForm()
+        if form.validate_on_submit():
+            if request.method == 'POST':
+                mru.add()
+                return redirect(url_for('register_user.get_all_register_user'))
+        return render_template('register_user/add_user.html', form=form, user=current_user)
 
 
 def delete(id):
-    try:
-        role_check = Roles.query.filter_by(name='register user').first()
-        user = User.query.filter_by(id=id, role_id=role_check.id).first()
-        if user:
-            db.session.delete(user)
-            db.session.commit()
-            flash('Delete successfully', 'success')
-            return 'Delete successfully!', 200
-        else:
-            return '404 not found', 404
-    except:
-        flash('Delete unsuccessfully', 'danger')
-        return 'Delete unsuccessfully!'
+    if check_header():
+        return mru.delete(id)
+    else:
+        mru.delete(id)
+        return redirect(url_for('register_user.get_all_register_user'))

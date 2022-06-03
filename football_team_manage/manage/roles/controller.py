@@ -1,88 +1,62 @@
-from flask import request, flash
-from football_team_manage import db
-from football_team_manage.manage.validator import validate_data
-from football_team_manage.models.models import Roles, User
+from flask import render_template, url_for, request, redirect, flash
+from football_team_manage.manage.form import EditionForm, InsertionRolesForm
+from football_team_manage.manage.middleware import check_header
+import football_team_manage.manage.roles.services as mr
 
 
-def get_all():
-    roles = Roles.query.all()
-    list = {}
-    for item in roles:
-        position = {'id': item.id, 'name': item.name}
-        list[item.id] = position
-    return list
-
-
-def get(id):
-    data = request.form.to_dict()
-    roles = Roles.query.filter_by(id=id).first()
-    if roles:
-        data['name'] = roles.name
-        return data
+def get_list(current_user):
+    if check_header():
+        list = mr.get_all()
+        if list:
+            return list
+        else:
+            return 'not found any record'
     else:
-        return 'not found', 404
+        dict = mr.get_all()
+        list = dict.values()
+        return render_template('roles/role.html', title='Role', data=list, user=current_user)
 
 
-def update(id):
-    try:
-        data = request.json
-        role = Roles.query.filter_by(id=id).first()
-        role_check = Roles.query.filter_by(name=data['name']).first()
-        validator = validate_data(data)
-        if role:
-            if validator != True:
-                return validator
+def update(current_user, id):
+    if check_header():
+        if request.method == 'GET':
+            data = mr.get(id)
+            if data:
+                return data
             else:
-                if data['name'] != role.name:
-                    if role_check:
-                        flash('That name is taken. Please choose a different one.', 'danger')
-                        return 'That name is taken. Please choose a different one.'
-                    role.name = data['name']
-                    db.session.commit()
-                    flash('Update Successfully!', 'success')
-                    return 'Update Successfully!'
+                return 'That role is not allow to edit. Please choose a different one!'
         else:
-            return 'not found', 404
-    except:
-        flash('Update unsuccessfully!', 'danger')
-        return 'Update unsuccessfully!'
+            return mr.update(id)
+    else:
+        form = EditionForm()
+        if form.validate_on_submit():
+            mr.update(id)
+            return redirect(url_for('roles.update_role', id=id))
+        if request.method == 'GET':
+            data = mr.get(id)
+            if data:
+                form = EditionForm(data=data)
+            else:
+                flash('That role is not allow to edit. Please choose a different one!', 'danger')
+                return redirect(url_for('roles.get_all_role', id=id))
+        return render_template('roles/update_role.html', title='Update Role', form=form, user=current_user, id=id)
 
 
-def delete(id):
-    try:
-        role = Roles.query.filter_by(id=id).first()
-        if role:
-            users = User.query.filter_by(role_id=id).all()
-            db.session.delete(role)
-            for user in users:
-                db.session.delete(user)
-            db.session.commit()
-            flash('Delete successfully', 'success')
-            return 'Delete successfully!'
-        else:
-            return '404 not found', 404
-    except:
-        flash('Delete unsuccessfully', 'danger')
-        return 'Delete unsuccessfully!'
+def delete(current_user, id):
+    if check_header():
+        return mr.delete(id)
+    else:
+        mr.delete(id)
+        return redirect(url_for('roles.get_all_role'))
 
 
-def add():
-    try:
-        data = request.json
-        name = data['name']
-        role_check = Roles.query.filter_by(name=data['name']).first()
-        validator = validate_data(data)
-        if validator != True:
-            flash('Add unsuccessfully', 'danger')
-            return validator
-        elif role_check:
-            return 'that role name is taken. Please choose a different one!'
-        else:
-            role = Roles(name=name)
-            db.session.add(role)
-            db.session.commit()
-            flash('Add successfully!', 'success')
-            return 'Add successfully'
-    except:
-        flash('Add unsuccessfully', 'danger')
-        return 'Add unsuccessfully'
+def insert(current_user):
+    if check_header():
+        return mr.add()
+    else:
+        form = InsertionRolesForm()
+        if form.validate_on_submit():
+            if request.method == 'POST':
+                mr.add()
+                return redirect(url_for('roles.get_all_role'))
+        return render_template('roles/add_role.html', title='Add Role', form=form, user=current_user)

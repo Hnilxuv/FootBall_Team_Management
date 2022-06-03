@@ -1,96 +1,54 @@
-from flask import request, flash
-from football_team_manage import db
-from football_team_manage.manage.validator import validate_update_data, validate_insert_data, validate_player_data
-from football_team_manage.models.models import Player, Position
+from flask import render_template, url_for, request, redirect
+from football_team_manage.manage.form import EditionPlayerForm, InsertionPlayerForm
+from football_team_manage.manage.middleware import check_header
+import football_team_manage.manage.player.services as mp
 
 
-def get_all():
-    players = Player.query.all()
-    list = {}
-    for item in players:
-        player = {'id': item.id, 'name': item.name, 'shirt_number': item.shirt_number,
-                  'age': item.age, 'join_time': item.join_time, 'position_name': item.position.name}
-        list[item.id] = player
-    return list
-
-
-def get(id):
-    data = request.form.to_dict()
-    player = Player.query.filter_by(id=id).first()
-    if player:
-        data['name'] = player.name
-        data['shirt_number'] = player.shirt_number
-        data['age'] = player.age
-        data['join_time'] = player.join_time
-        data['position_name'] = player.position.name
-        return data
+def get_list(current_user):
+    if check_header():
+        list = mp.get_all()
+        if list:
+            return list
+        else:
+            return 'not found any record'
     else:
-        return '404 not found', 404
+        dict = mp.get_all()
+        list = dict.values()
+        return render_template('player/player.html', title='Player', data=list, user=current_user)
 
 
-def update(id):
-    try:
-        data = request.json
-        player = Player.query.filter_by(id=id).first()
-        shirt_no = Player.query.filter_by(shirt_number=data['shirt_number']).first()
-        position = Position.query.filter_by(name=data['position_name']).first()
-        validator = validate_player_data(data)
-        if player:
-            if validator != True:
-                return validator
-            else:
-                if data['shirt_number'] != player.shirt_number:
-                    if shirt_no:
-                        return 'that shirt number is taken. Please choose a different one!'
-                elif not position:
-                    return 'invalid position name!'
-                else:
-                    player.name = data['name']
-                    player.age = data['age']
-                    player.shirt_number = data['shirt_number']
-                    player.position_id = position.id
-                    db.session.commit()
-                    return 'Update successfully!'
+def update(current_user, id):
+    if check_header():
+        if request.method == 'GET':
+            return mp.get(id)
         else:
-            return '404 not found', 404
-    except:
-        return 'Update unsuccessfully!'
+            return mp.update(id)
+    else:
+        form = EditionPlayerForm()
+        if form.validate_on_submit():
+            mp.update(id)
+            return redirect(url_for('position.update_position', id=id))
+        if request.method == 'GET':
+            data = mp.get(id)
+            form = EditionPlayerForm(data=data)
+        return render_template('player/player.html', title='Update Player', form=form, user=current_user, id=id)
 
 
-def add():
-    try:
-        data = request.json
-        position = Position.query.filter_by(name=data['position_name']).first()
-        name = data['name']
-        age = data['age']
-        shirt_number = data['shirt_number']
-        shirt_no = Player.query.filter_by(shirt_number=data['shirt_number']).first()
-        validator = validate_player_data(data)
-        if validator != True:
-            return validator
-        elif shirt_no:
-            return 'that shirt number is taken. Please choose a different one!'
-        elif not position:
-            return 'invalid position name'
-        new_player = Player(name=name, shirt_number=shirt_number, age=age, position_id=position.id)
-        db.session.add(new_player)
-        db.session.commit()
-        flash('Add successfully!', 'success')
-        return 'Add successfully'
-    except:
-        flash('Add unsuccessfully', 'danger')
-        return 'Add unsuccessfully'
+def delete(current_user, id):
+    if check_header():
+        return mp.delete(id)
+    else:
+        mp.delete(id)
+        return redirect(url_for('player.get_all_player'))
 
-def delete(id):
-    try:
-        player = Player.query.filter_by(id=id).first()
-        if player:
-            db.session.delete(player)
-            db.session.commit()
-            flash('Delete successfully', 'success')
-            return 'Delete successfully!'
-        else:
-            return '404 not found', 404
-    except:
-        flash('Delete unsuccessfully', 'danger')
-        return 'Delete unsuccessfully!'
+
+def insert(current_user):
+    if check_header():
+        return mp.add()
+    else:
+        form = InsertionPlayerForm()
+        if form.validate_on_submit():
+            if request.method == 'POST':
+                mp.add()
+                return redirect(url_for('player.get_all_player'))
+        return render_template('player/add_player.html', title='Add Player', form=form, user=current_user)

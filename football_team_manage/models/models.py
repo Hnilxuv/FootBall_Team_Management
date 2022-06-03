@@ -43,6 +43,7 @@ class Roles(db.Model):
     __table_args__ = {'extend_existing': True}
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String(50), nullable=False)
+    created_time = Column(DateTime, default=datetime.now())
     user = relationship('User', backref='roles', lazy=False)
 
     def __str__(self):

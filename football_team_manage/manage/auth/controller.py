@@ -1,71 +1,38 @@
-import jwt
-from werkzeug.security import generate_password_hash, check_password_hash
-from flask import flash, request, jsonify
-from football_team_manage.models.models import User, Roles
+from flask import make_response, render_template, url_for, redirect, request
+from football_team_manage.manage.auth.services import register, signin
+from football_team_manage.manage.middleware import check_header
+from football_team_manage.models.models import User
 from datetime import datetime, timedelta
-from football_team_manage import app, db
-from football_team_manage.manage.validator import validate_register_data, validate_login_data
+from football_team_manage import app
+import jwt
+from football_team_manage.manage.form import RegistrationForm, LoginForm
 
 
-def register():
-    data = request.form
-    username = data['username']
-    password = data['password']
-    password_hash = generate_password_hash(password)
-    password_confirm = data['confirm_password']
-    name = data['name']
-    email = data['email']
-    phone = data['phone']
-    status = True
-    role = Roles.query.filter_by(name='register user').first()
-    validator = validate_register_data(data)
-    if validator != True:
-        return validator
+def login_auth():
+    if check_header():
+        return signin()
     else:
-        user_name = User.query.filter_by(user_name=username).first()
-        if not user_name:
-            user_email = User.query.filter_by(email=email).first()
-            if not user_email:
-                if data['password'] == password_confirm:
-                    new_user = User(user_name=username, name=name, password=password_hash, email=email, phone=phone,
-                                    role_id=role.id, status=status)
-                    db.session.add(new_user)
-                    db.session.commit()
-                    return 'register successful'
-                else:
-                    return 'password confirm invalid'
-            else:
-                return 'email is existed'
-        else:
-            return 'username is existed'
+        form = LoginForm()
+        if form.validate_on_submit():
+            token = signin()
+            res = make_response(redirect(url_for('home.index')))
+            res.set_cookie("token", value=token)
+            return res
+        return render_template('auth/login.html', title='Login', form=form)
 
 
-def signin():
-    try:
-        data = request.form
-        username = data['username']
-        password = data['password']
-        validator = validate_login_data(data)
-        if validator != True:
-            return validator
-        else:
-            user_login = User.query.filter_by(user_name=username).first()
-            if not user_login:
-                flash('Login Unsuccessful. Please check email and password', 'danger')
-                return 'Login Unsuccessful. Please check email and password'
-            if not check_password_hash(user_login.password, password):
-                flash('Login Unsuccessful. Please check email and password', 'danger')
-                return 'Login Unsuccessful. Please check email and password'
-            if not user_login.status:
-                flash('Login Unsuccessful. This account is banned', 'danger')
-                return 'Login Unsuccessful. This account is banned'
-            token = jwt.encode({'id': user_login.id, 'exp': datetime.utcnow() + timedelta(hours=24)},
-                               app.config['SECRET_KEY'])
-            return token
-    except:
-        flash('Login Unsuccessful. Please check email and password', 'danger')
-        return 'Login Unsuccessful. Please check email and password'
-
-
-
-
+def register_auth():
+    if check_header():
+        return register()
+    else:
+        form = RegistrationForm()
+        if form.validate_on_submit():
+            if request.method == 'POST':
+                register()
+                user_login = User.query.filter_by(user_name=form.username.data).first()
+                token = jwt.encode({'id': user_login.id, 'exp': datetime.utcnow() + timedelta(days=1)},
+                                   app.config['SECRET_KEY'])
+                res = make_response(redirect(url_for('home.index')))
+                res.set_cookie("token", value=token)
+                return res
+        return render_template('auth/register.html', title='Register', form=form)

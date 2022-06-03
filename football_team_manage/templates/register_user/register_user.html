@@ -1,0 +1,49 @@
+{% extends "layout.html" %}
+{% block content %}
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        {% for category, msg in messages %}
+        {% if category == 'success' %}
+            <div class="alert alert-success alert-dismissable" role="alert">
+                {{msg}}</div>
+        {% elif category == 'danger' %}
+            <div class="alert alert-danger alert-dismissable" role="alert">
+                {{msg}}</div>
+        {% endif %}
+        {% endfor %}
+        {% endif %}
+        {% endwith %}
+
+<h2>Manage <b>Register User</b>  <a href="/registeruser/insert" class="btn btn-success float-right" >Add New Register User</a> </h2>
+<table class="table">
+    <tr class="table_header">
+
+        <th>User Name</th>
+        <th>Name</th>
+        <th>Email</th>
+        <th>Phone</th>
+        <th>Role Name</th>
+        <th>Status</th>
+        <th>Option</th>
+    </tr>
+    {% for row in data %}
+    <tr class="table_row">
+        <td>{{row['user_name']}}</td>
+        <td>{{row['name']}}</td>
+        <td>{{row['email']}}</td>
+        <td>{{row['phone']}}</td>
+        <td>{{row['role_name']}}</td>
+        <td>{{row['status']}}</td>
+        <td>
+            <a href="/registeruser/update/{{row['id']}}" class="btn btn-warning btn-xs">Edit</a>
+            <a href="/registeruser/delete/{{row['id']}}" class="btn btn-danger btn-xs"
+               onclick="return confirm('Are You Sure To Delete ?')">Delete</a>
+        </td>
+    </tr>
+
+    {% endfor %}
+</table>
+
+
+{% endblock content %}

@@ -1,3 +1,7 @@
 .idea
 venv
 __pycache__
+
+/football_team_manage/__pycache__
+/football_team_manage/.idea
+/football_team_manage/venv

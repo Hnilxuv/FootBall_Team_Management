@@ -1,88 +1,54 @@
-from flask import request, flash
-from football_team_manage import db
-from football_team_manage.manage.validator import validate_data
-from football_team_manage.models.models import Position, Player
+from flask import render_template, url_for, request, redirect
+from football_team_manage.manage.form import EditionForm, InsertionPositionForm
+from football_team_manage.manage.middleware import check_header
+import football_team_manage.manage.position.services as mp
 
 
-def get_all():
-    positions = Position.query.all()
-    list = {}
-    for item in positions:
-        position = {'id': item.id, 'name': item.name, 'join_time': item.created_time}
-        list[item.id] = position
-    return list
-
-
-def get(id):
-    data = request.form.to_dict()
-    position = Position.query.filter_by(id=id).first()
-    if position:
-        data['name'] = position.name
-        return data
+def get_list(current_user):
+    if check_header():
+        list = mp.get_all()
+        if list:
+            return list
+        else:
+            return 'not found any record'
     else:
-        return 'not found', 404
+        dict = mp.get_all()
+        list = dict.values()
+        return render_template('position/position.html', title='Position', data=list, user=current_user)
 
 
-def update(id):
-    try:
-        data = request.form
-        position = Position.query.filter_by(id=id).first()
-        position_check = Position.query.filter_by(name=data['name']).first()
-        validator = validate_data(data)
-        if position:
-            if validator != True:
-                return validator
-            else:
-                if data['name'] != position.name:
-                    if position_check:
-                        flash('That name is taken. Please choose a different one.', 'danger')
-                        return 'That name is taken. Please choose a different one.'
-                    position.name = data['name']
-                    db.session.commit()
-                    flash('Update Successfully!', 'success')
-                    return 'Update Successfully!'
+def update(current_user, id):
+    if check_header():
+        if request.method == 'GET':
+            return mp.get(id)
         else:
-            return 'not found', 404
-    except:
-        flash('Update unsuccessfully!', 'danger')
-        return 'Update unsuccessfully!'
+            return mp.update(id)
+    else:
+        form = EditionForm()
+        if form.validate_on_submit():
+            mp.update(id)
+            return redirect(url_for('position.update_position', id=id))
+        if request.method == 'GET':
+            data = mp.get(id)
+            form = EditionForm(data=data)
+        return render_template('position/update_position.html', title='Update Position', form=form, user=current_user, id=id)
 
 
-def delete(id):
-    try:
-        position = Position.query.filter_by(id=id).first()
-        if position:
-            players = Player.query.filter_by(position_id=id).all()
-            db.session.delete(position)
-            for player in players:
-                db.session.delete(player)
-            db.session.commit()
-            flash('Delete successfully', 'success')
-            return 'Delete successfully!'
-        else:
-            return '404 not found', 404
-    except:
-        flash('Delete unsuccessfully', 'danger')
-        return 'Delete unsuccessfully!'
+def delete(current_user, id):
+    if check_header():
+        return mp.delete(id)
+    else:
+        mp.delete(id)
+        return redirect(url_for('position.get_all_position'))
 
 
-def add():
-    try:
-        data = request.json
-        name = data['name']
-        league_check = Position.query.filter_by(name=data['name']).first()
-        validator = validate_data(data)
-        if validator != True:
-            flash('Add unsuccessfully', 'danger')
-            return validator
-        elif league_check:
-            return 'name is existed'
-        else:
-            league = Position(name=name)
-            db.session.add(league)
-            db.session.commit()
-            flash('Add successfully!', 'success')
-            return 'Add successfully'
-    except:
-        flash('Add unsuccessfully', 'danger')
-        return 'Add unsuccessfully'
+def insert(current_user):
+    if check_header():
+        return mp.add()
+    else:
+        form = InsertionPositionForm()
+        if form.validate_on_submit():
+            if request.method == 'POST':
+                mp.add()
+                return redirect(url_for('position.get_all_position'))
+        return render_template('position/add_position.html', title='Add Position', form=form, user=current_user)
