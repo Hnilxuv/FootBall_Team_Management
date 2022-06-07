@@ -15,16 +15,18 @@
     {% endif %}
 </head>
 <body>
-<header class="site-header">
-    <nav class="navbar navbar-expand-md navbar-dark bg-steel fixed-top">
-        <div class="container">
-            <a class="navbar-brand mr-4" href="/">Football Team Management</a>
-            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarToggle"
-                    aria-controls="navbarToggle" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarToggle">
-                <div class="navbar-nav mr-auto">
+
+
+<div class="col-md-3 float-left" style="padding: 0px">
+<nav class="navbar-dark bg-dark">
+        <div class="container flex-column">
+<!--            <button class="navbar-toggler btn btn-sm" data-toggle="collapse" data-target="#navbarToggle"-->
+<!--                    aria-controls="navbarToggle" aria-expanded="true" aria-label="Toggle navigation">-->
+<!--                <span class="navbar-toggler-icon"></span>-->
+<!--            </button>-->
+            <a class="navbar-brand" href="/">Soccer Team Management</a>
+            <div class="collapse show navbar-collapse " id="navbarToggle">
+                <div class="navbar-nav ">
                     <a class="nav-item nav-link" href="/">Home</a>
                     {% if user.roles.name == 'register user' %}
                     <a class="nav-item nav-link" href="/player">Player</a>
@@ -52,29 +54,91 @@
                     <a class="nav-item nav-link" href="/role">Role</a>
 
                     {% endif %}
+                    <a class="nav-item nav-link" href="#"></a>
+                    <a class="nav-item nav-link" href="#"></a>
+                    <a class="nav-item nav-link" href="#"></a>
+                    <a class="nav-item nav-link" href="#"></a>
+                    <a class="nav-item nav-link" href="#"></a>
+                    <a class="nav-item nav-link" href="#"></a>
+                    <a class="nav-item nav-link" href="#"></a>
+                    <a class="nav-item nav-link" href="#"></a>
+                    <a class="nav-item nav-link" href="#"></a>
+                    <a class="nav-item nav-link" href="#"></a>
+                    <a class="nav-item nav-link" href="#"></a>
+                    <a class="nav-item nav-link" href="#"></a>
+                    <a class="nav-item nav-link" href="#"></a>
+                    <a class="nav-item nav-link" href="#"></a><a class="nav-item nav-link" href="#"></a>
+                    <a class="nav-item nav-link" href="#"></a>
+                    <a class="nav-item nav-link" href="#"></a>
+                    <a class="nav-item nav-link" href="#"></a>
+                    <a class="nav-item nav-link" href="#"></a>
+                    <a class="nav-item nav-link" href="#"></a>
+                    <a class="nav-item nav-link" href="#"></a>
+                    <a class="nav-item nav-link" href="#"></a>
+                    <a class="nav-item nav-link" href="#"></a>
+                    <a class="nav-item nav-link" href="#"></a>
+                    <a class="nav-item nav-link" href="#"></a>
+                    <a class="nav-item nav-link" href="#"></a>
+                    <a class="nav-item nav-link" href="#"></a>
+                    <a class="nav-item nav-link" href="#"></a>
+                    <a class="nav-item nav-link" href="#"></a>
+                    <a class="nav-item nav-link" href="#"></a>
+                    <a class="nav-item nav-link" href="#"></a>
+                    <a class="nav-item nav-link" href="#"></a>
+                    <a class="nav-item nav-link" href="#"></a>
+                    <a class="nav-item nav-link" href="#"></a>
+                    <a class="nav-item nav-link" href="#"></a>
+                    <a class="nav-item nav-link" href="#"></a>
+
                 </div>
                 <!-- Navbar Right Side -->
-                <div class="navbar-nav">
-                    {% if user %}
-                    <a class="nav-item nav-link" href="{{ url_for('home.account') }}">{{ user.name }}</a>
-<!--                    <a class="nav-item nav-link" href="{{ url_for('home.change_account_password') }}">Change Password</a>-->
-                    <a class="nav-item nav-link" href="{{ url_for('auth.logout') }}">Logout</a>
-                    {% else %}
-                    <a class="nav-item nav-link" href="{{ url_for('auth.login') }}">Login</a>
-                    <a class="nav-item nav-link" href="{{ url_for('auth.register') }}">Register</a>
-                    {% endif %}
-                </div>
+
             </div>
         </div>
     </nav>
-</header>
-<main role="main" class="container">
-    <div class="row">
-        <div class="col-md-10">
-            {% block content %}{% endblock %}
+</div>
+<div class="col-md-9 column float-right">
+    <div class="navbar justify-content-end col-md-12">
+        {% if user %}
+        <div class="dropdown">
+           <button class="btn btn-outline " type="button" data-toggle="dropdown">
+           <a class="nav-item nav-link" href="{{ url_for('home.account') }}">{{ user.name }}</a>
+           <span class="caret"></span></button>
+           <ul class="dropdown-menu">
+                 <li><a class="nav-item nav-link" href="{{ url_for('home.change_account_password') }}">Change Password</a></li>
+                 <li><a class="nav-item nav-link" href="{{ url_for('auth.logout') }}">Logout</a></li>
+           </ul>
         </div>
+        {% else %}
+        <div class="dropdown">
+           <button class="btn btn-outline " type="button" data-toggle="dropdown">Account
+           <span class="caret"></span></button>
+           <ul class="dropdown-menu">
+               <li><a class="nav-item nav-link" href="{{ url_for('auth.login') }}">Log In</a></li>
+               <li><a class="nav-item nav-link" href="{{ url_for('auth.register') }}">Register</a></li>
+           </ul>
+        </div>
+        {% endif %}
     </div>
-</main>
+        <hr>
+    <div class="row">
+
+        <div class="col-md-12">
+        {% block content %}
+        {% endblock %}
+        </div>
+
+    </div>
+    <footer>
+    <section class=" justify-content-center  p-4 border-bottom">
+    <div class="text-center p-4" style="background-color: rgba(0, 0, 0, 0.05);">
+    © 2021 Copyright:
+    <a class="text-reset fw-bold" href="#">Vũ Đình Linh</a>
+    </div>
+    </section>
+</footer>
+    </div>
+
 
 
 <!-- Optional JavaScript -->

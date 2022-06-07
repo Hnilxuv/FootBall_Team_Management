@@ -15,8 +15,10 @@ def login_auth():
         form = LoginForm()
         if form.validate_on_submit():
             token = signin()
-            res = make_response(redirect(url_for('home.index')))
+            # access_token = bytes.fromhex(token.hex()).decode('utf-8')
+            res = redirect(url_for('home.index'))
             res.set_cookie("token", value=token)
+            # res.headers["Authorization"] = f"Bearer {access_token}"
             return res
         return render_template('auth/login.html', title='Login', form=form)
 

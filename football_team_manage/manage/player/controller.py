@@ -31,7 +31,7 @@ def update(current_user, id):
         if request.method == 'GET':
             data = mp.get(id)
             form = EditionPlayerForm(data=data)
-        return render_template('player/player.html', title='Update Player', form=form, user=current_user, id=id)
+        return render_template('player/add_player.html', title='Update Player', form=form, user=current_user, id=id)
 
 
 def delete(current_user, id):

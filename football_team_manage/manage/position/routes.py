@@ -7,7 +7,7 @@ position = Blueprint('position', __name__)
 
 @position.route('/position')
 @token_required
-@has_permission(["admin", "manager", "staff", "register"])
+@has_permission(["admin", "manager", "staff", "register user"])
 def get_all_position(current_user):
     return get_list(current_user)
 
