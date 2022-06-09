@@ -15,7 +15,7 @@ class RegistrationForm(FlaskForm):
     confirm_password = StringField('Confirm Password', widget=PasswordInput(hide_value=False),
                                    validators=[DataRequired(), EqualTo('password')])
     phone = StringField('Phone', validators=[DataRequired(), Length(max=11), Regexp(regex=r'^[0-9]{11}')])
-    submit = SubmitField('Sign in')
+    submit = SubmitField('Sign up')
 
     def validate_username(self, username):
         user = User.query.filter_by(user_name=username.data).first()
@@ -137,6 +137,7 @@ class EditionPlayerForm(FlaskForm):
     name = StringField('Name', validators=[DataRequired(), Length(min=2, max=50)])
     shirt_number = StringField('Shirt Number', validators=[DataRequired(), Length(max=50), Regexp(regex=r'^[0-9]{1,}')])
     age = StringField('Age', validators=[DataRequired(), Length(max=50), Regexp(regex=r'^[0-9]{1,}')])
+    # join_time = StringField('Join Time', render_kw={'readonly': True})
     position_name = SelectField('Position', choices=[position.name for position in Position.query.all()])
     submit = SubmitField('Update')
 

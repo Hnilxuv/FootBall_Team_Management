@@ -27,7 +27,7 @@ def update(current_user, id):
         form = EditionPlayerForm()
         if form.validate_on_submit():
             mp.update(id)
-            return redirect(url_for('position.update_position', id=id))
+            return redirect(url_for('player.update_player', id=id))
         if request.method == 'GET':
             data = mp.get(id)
             form = EditionPlayerForm(data=data)

@@ -20,7 +20,7 @@ def page_not_found(current_user, _error):
     if check_header():
         return '404 not found', 500
     else:
-        return render_template('error/404.html', user=current_user), 500
+        return render_template('error/500.html', user=current_user), 500
 
 
 @error.app_errorhandler(400)

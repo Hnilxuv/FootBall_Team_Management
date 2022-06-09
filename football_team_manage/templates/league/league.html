@@ -14,7 +14,7 @@
         {% endfor %}
         {% endif %}
         {% endwith %}
-
+{% if user.roles.name != 'register user' %}
 <h2>Manage <b>League</b>  <a href="/league/insert" class="btn btn-success float-right" >Add New League</a> </h2>
 <table class="table">
     <tr class="table_header">
@@ -35,6 +35,27 @@
 
     {% endfor %}
 </table>
+{% else %}
+    <h2>Manage <b>League</b></h2>
+<table class="table">
+    <tr class="table_header">
+        <th>Name</th>
+        <th>Join Time</th>
+<!--        <th>Option</th>-->
+    </tr>
+    {% for row in data %}
+    <tr class="table_row">
+        <td>{{row['name']}}</td>
+        <td>{{row['join_time']}}</td>
+<!--        <td>-->
+<!--            <a href="/league/update/{{row['id']}}" class="btn btn-warning btn-xs">Edit</a>-->
+<!--            <a href="/league/delete/{{row['id']}}" class="btn btn-danger btn-xs"-->
+<!--               onclick="return confirm('Are You Sure To Delete ?')">Delete</a>-->
+<!--        </td>-->
+    </tr>
 
+    {% endfor %}
+</table>
+{% endif %}
 
 {% endblock content %}

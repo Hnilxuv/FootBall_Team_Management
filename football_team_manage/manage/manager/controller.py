@@ -45,7 +45,7 @@ def insert(current_user):
         if form.validate_on_submit():
             if request.method == 'POST':
                 mm.add()
-                return redirect(url_for('manager.get_all_admin'))
+                return redirect(url_for('manager.get_all_manager'))
         return render_template('manager/add_user.html', form=form, user=current_user)
 
 

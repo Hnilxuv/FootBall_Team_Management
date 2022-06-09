@@ -27,7 +27,6 @@ def get(id):
         data['name'] = player.name
         data['shirt_number'] = player.shirt_number
         data['age'] = player.age
-        data['join_time'] = player.join_time
         data['position_name'] = player.position.name
         return data
     else:
@@ -40,7 +39,6 @@ def update(id):
     else:
         data = request.form
     player = Player.query.filter_by(id=id).first()
-
     validator = validate_player_data(data)
     if player:
         if validator != True:
@@ -50,8 +48,10 @@ def update(id):
             position = Position.query.filter_by(name=data['position_name']).first()
             if data['shirt_number'] != player.shirt_number.__str__():
                 if shirt_no:
-                    return 'that shirt number is taken. Please choose a different one!'
+                    flash('That shirt number is taken. Please choose a different one!', 'danger')
+                    return 'That shirt number is taken. Please choose a different one!'
             if not position:
+                flash('Delete successfully', 'success')
                 return 'invalid position name!'
             else:
                 player.name = data['name']
@@ -59,7 +59,8 @@ def update(id):
                 player.shirt_number = data['shirt_number']
                 player.position_id = position.id
                 db.session.commit()
-                return 'Update successfully!'
+                flash('Update successfully!', 'success')
+                return 'Update successfully!', 200
     else:
         return abort(404)
 
@@ -80,14 +81,16 @@ def add():
         shirt_number = data['shirt_number']
         shirt_no = Player.query.filter_by(shirt_number=data['shirt_number']).first()
         if shirt_no:
-            return 'that shirt number is taken. Please choose a different one!'
+            flash('That shirt number is taken. Please choose a different one!', 'danger')
+            return 'That shirt number is taken. Please choose a different one!'
         elif not position:
-            return 'invalid position name'
+            flash('Invalid position name', 'danger')
+            return 'Invalid position name'
         new_player = Player(name=name, shirt_number=shirt_number, age=age, position_id=position.id)
         db.session.add(new_player)
         db.session.commit()
         flash('Add successfully!', 'success')
-        return 'Add successfully'
+        return 'Add successfully', 201
 
 
 def delete(id):
@@ -96,6 +99,6 @@ def delete(id):
         db.session.delete(player)
         db.session.commit()
         flash('Delete successfully', 'success')
-        return 'Delete successfully!'
+        return 'Delete successfully!', 200
     else:
         return abort(404)

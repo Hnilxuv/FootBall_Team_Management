@@ -140,6 +140,6 @@ def delete(id):
         db.session.delete(user)
         db.session.commit()
         flash('Delete successfully', 'success')
-        return 'Delete successfully!'
+        return 'Delete successfully!', 200
     else:
         return abort(404)

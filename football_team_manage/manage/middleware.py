@@ -8,8 +8,8 @@ from football_team_manage.models.models import User
 
 
 def check_header():
-    content_type = request.headers.get('Content-Type')
-    if content_type == 'application/json':
+    content_type = request.headers.get('User-Agent')
+    if content_type == 'PostmanRuntime/7.29.0':
         return True
     else:
         return False

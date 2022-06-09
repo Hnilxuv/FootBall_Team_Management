@@ -14,8 +14,8 @@
         {% endfor %}
         {% endif %}
         {% endwith %}
-
-<h2>Manage <b>League</b>  <a href="/position/insert" class="btn btn-success float-right" >Add New League</a> </h2>
+{% if user.roles.name != 'register user' %}
+<h2>Manage <b>League</b>  <a href="/position/insert" class="btn btn-success float-right" >Add New Position</a> </h2>
 <table class="table">
     <tr class="table_header">
         <th>Name</th>
@@ -35,6 +35,23 @@
 
     {% endfor %}
 </table>
+{% else %}
+<h2>Manage <b>League</b> </h2>
+<table class="table">
+    <tr class="table_header">
+        <th>Name</th>
+        <th>Join Time</th>
 
+    </tr>
+    {% for row in data %}
+    <tr class="table_row">
+        <td>{{row['name']}}</td>
+        <td>{{row['join_time']}}</td>
+
+    </tr>
+
+    {% endfor %}
+</table>
+{% endif %}
 
 {% endblock content %}
