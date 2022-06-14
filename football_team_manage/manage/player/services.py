@@ -7,14 +7,17 @@ from football_team_manage.manage.validator import validate_player_data
 from football_team_manage.models.models import Player, Position
 
 
-def get_all():
-    players = Player.query.all()
-    list = {}
-    for item in players:
-        player = {'id': item.id, 'name': item.name, 'shirt_number': item.shirt_number,
-                  'age': item.age, 'join_time': item.join_time, 'position_name': item.position.name}
-        list[item.id] = player
-    return list
+def get_all(page):
+    players = Player.query.paginate(page=page, per_page=3)
+    if check_header():
+        list = {}
+        for item in players.items:
+            player = {'id': item.id, 'name': item.name, 'shirt_number': item.shirt_number,
+                      'age': item.age, 'join_time': item.join_time, 'position_name': item.position.name}
+            list[item.id] = player
+        return list
+    else:
+        return players
 
 
 def get(id):
@@ -22,15 +25,12 @@ def get(id):
         data = request.json
     else:
         data = request.form.to_dict()
-    player = Player.query.filter_by(id=id).first()
-    if player:
-        data['name'] = player.name
-        data['shirt_number'] = player.shirt_number
-        data['age'] = player.age
-        data['position_name'] = player.position.name
-        return data
-    else:
-        return abort(404)
+    player = Player.query.filter_by(id=id).first_or_404()
+    data['name'] = player.name
+    data['shirt_number'] = player.shirt_number
+    data['age'] = player.age
+    data['position_name'] = player.position.name
+    return data
 
 
 def update(id):
@@ -38,31 +38,25 @@ def update(id):
         data = request.json
     else:
         data = request.form
-    player = Player.query.filter_by(id=id).first()
+    player = Player.query.filter_by(id=id).first_or_404()
     validator = validate_player_data(data)
-    if player:
-        if validator != True:
-            return validator
-        else:
-            shirt_no = Player.query.filter_by(shirt_number=data['shirt_number']).first()
-            position = Position.query.filter_by(name=data['position_name']).first()
-            if data['shirt_number'] != player.shirt_number.__str__():
-                if shirt_no:
-                    flash('That shirt number is taken. Please choose a different one!', 'danger')
-                    return 'That shirt number is taken. Please choose a different one!'
-            if not position:
-                flash('Delete successfully', 'success')
-                return 'invalid position name!'
-            else:
-                player.name = data['name']
-                player.age = data['age']
-                player.shirt_number = data['shirt_number']
-                player.position_id = position.id
-                db.session.commit()
-                flash('Update successfully!', 'success')
-                return 'Update successfully!', 200
+    if validator != True:
+        return validator
     else:
-        return abort(404)
+        shirt_no = Player.query.filter_by(shirt_number=data['shirt_number']).first()
+        position = Position.query.filter_by(name=data['position_name']).first_or_404()
+        if data['shirt_number'] != player.shirt_number.__str__():
+            if shirt_no:
+                flash('That shirt number is taken. Please choose a different one!', 'danger')
+                return 'That shirt number is taken. Please choose a different one!'
+        else:
+            player.name = data['name']
+            player.age = data['age']
+            player.shirt_number = data['shirt_number']
+            player.position_id = position.id
+            db.session.commit()
+            flash('Update successfully!', 'success')
+            return 'Update successfully!', 200
 
 
 def add():
@@ -75,7 +69,7 @@ def add():
     if validator != True:
         return validator
     else:
-        position = Position.query.filter_by(name=data['position_name']).first()
+        position = Position.query.filter_by(name=data['position_name']).first_or_404()
         name = data['name']
         age = data['age']
         shirt_number = data['shirt_number']
@@ -83,9 +77,6 @@ def add():
         if shirt_no:
             flash('That shirt number is taken. Please choose a different one!', 'danger')
             return 'That shirt number is taken. Please choose a different one!'
-        elif not position:
-            flash('Invalid position name', 'danger')
-            return 'Invalid position name'
         new_player = Player(name=name, shirt_number=shirt_number, age=age, position_id=position.id)
         db.session.add(new_player)
         db.session.commit()
@@ -94,11 +85,8 @@ def add():
 
 
 def delete(id):
-    player = Player.query.filter_by(id=id).first()
-    if player:
-        db.session.delete(player)
-        db.session.commit()
-        flash('Delete successfully', 'success')
-        return 'Delete successfully!', 200
-    else:
-        return abort(404)
+    player = Player.query.filter_by(id=id).first_or_404()
+    db.session.delete(player)
+    db.session.commit()
+    flash('Delete successfully', 'success')
+    return 'Delete successfully!', 200

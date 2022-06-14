@@ -22,7 +22,7 @@
         <th>Join Time</th>
         <th>Option</th>
     </tr>
-    {% for row in data %}
+    {% for row in data.items %}
     <tr class="table_row">
         <td>{{row['name']}}</td>
         <td>{{row['join_time']}}</td>
@@ -41,21 +41,35 @@
     <tr class="table_header">
         <th>Name</th>
         <th>Join Time</th>
-<!--        <th>Option</th>-->
     </tr>
-    {% for row in data %}
+    {% for row in data.items %}
     <tr class="table_row">
         <td>{{row['name']}}</td>
         <td>{{row['join_time']}}</td>
-<!--        <td>-->
-<!--            <a href="/league/update/{{row['id']}}" class="btn btn-warning btn-xs">Edit</a>-->
-<!--            <a href="/league/delete/{{row['id']}}" class="btn btn-danger btn-xs"-->
-<!--               onclick="return confirm('Are You Sure To Delete ?')">Delete</a>-->
-<!--        </td>-->
     </tr>
 
     {% endfor %}
 </table>
 {% endif %}
-
+<br>
+<ul class="pagination">
+  {% if data.has_prev %}
+   <li class="page-item"><a class="page-link" href="{{ url_for('league.get_all_league', page=data.prev_num) }}">Previous</a></li>
+  {% else %}
+   <li class="page-item disabled"><span class="page-link">Previous</span>
+  {% endif %}
+   </li>
+  {% for page in data.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
+  {% if page %}
+   <li class="page-item"><a class="page-link" href="{{ url_for('league.get_all_league', page=page) }}">{{ page }}</a></li>
+  {% else %}
+   <li class="page-item disabled" id="example_ellipsis"><a href="#" class="page-link">…</a></li>
+  {% endif %}
+  {% endfor %}
+  {% if data.has_next %}
+   <li class="page-item"><a class="page-link" href="{{ url_for('league.get_all_league', page=data.next_num) }}">Next</a></li>
+  {% else %}
+   <li class="page-item disabled"><span class="page-link">Next</span>
+  {% endif %}
+   </ul>
 {% endblock content %}

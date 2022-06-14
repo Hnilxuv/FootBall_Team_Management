@@ -1,19 +1,20 @@
 from flask import request, flash
-from werkzeug.exceptions import abort
-
 from football_team_manage import db
 from football_team_manage.manage.middleware import check_header
 from football_team_manage.manage.validator import validate_data
 from football_team_manage.models.models import LeagueJoin
 
 
-def get_all():
-    leagues = LeagueJoin.query.all()
-    list = {}
-    for item in leagues:
-        league = {'id': item.id, 'name': item.name, 'join_time': item.join_time}
-        list[item.id] = league
-    return list
+def get_all(page):
+    leagues = LeagueJoin.query.paginate(page=page, per_page=3)
+    if check_header():
+        list = {}
+        for item in leagues.items:
+            league = {'id': item.id, 'name': item.name, 'join_time': item.join_time}
+            list[item.id] = league
+        return list
+    else:
+        return leagues
 
 
 def get(id):
@@ -21,12 +22,9 @@ def get(id):
         data = request.get_json()
     else:
         data = request.form.to_dict()
-    league = LeagueJoin.query.filter_by(id=id).first()
-    if league:
-        data['name'] = league.name
-        return data
-    else:
-        return abort(404)
+    league = LeagueJoin.query.filter_by(id=id).first_or_404()
+    data['name'] = league.name
+    return data
 
 
 def update(id):
@@ -34,34 +32,28 @@ def update(id):
         data = request.get_json()
     else:
         data = request.form
-    league = LeagueJoin.query.filter_by(id=id).first()
+    league = LeagueJoin.query.filter_by(id=id).first_or_404()
     validator = validate_data(data)
-    if league:
-        if validator != True:
-            return validator
-        else:
-            league_check = LeagueJoin.query.filter_by(name=data['name']).first()
-            if data['name'] != league.name:
-                if league_check:
-                    flash('That name is taken. Please choose a different one.', 'danger')
-                    return 'That name is taken. Please choose a different one.'
-            league.name = data['name']
-            db.session.commit()
-            flash('Update Successfully!', 'success')
-            return 'Update Successfully!'
+    if validator != True:
+        return validator
     else:
-        return abort(404)
+        league_check = LeagueJoin.query.filter_by(name=data['name']).first()
+        if data['name'] != league.name:
+            if league_check:
+                flash('That name is taken. Please choose a different one.', 'danger')
+                return 'That name is taken. Please choose a different one.'
+        league.name = data['name']
+        db.session.commit()
+        flash('Update Successfully!', 'success')
+        return 'Update Successfully!'
 
 
 def delete(id):
-    league = LeagueJoin.query.filter_by(id=id).first()
-    if league:
-        db.session.delete(league)
-        db.session.commit()
-        flash('Delete successfully', 'success')
-        return 'Delete successfully!', 200
-    else:
-        return abort(404)
+    league = LeagueJoin.query.filter_by(id=id).first_or_404()
+    db.session.delete(league)
+    db.session.commit()
+    flash('Delete successfully', 'success')
+    return 'Delete successfully!', 200
 
 
 def add():
@@ -70,7 +62,6 @@ def add():
             data = request.get_json()
         else:
             data = request.form
-
         validator = validate_data(data)
         if validator != True:
             flash('Add unsuccessfully', 'danger')

@@ -5,15 +5,15 @@ from flask import render_template, url_for, request, redirect
 
 
 def get_list(current_user):
+    page = request.args.get('page', 1, type=int)
     if check_header():
-        list = ms.get_all()
+        list = ms.get_all(page)
         if list:
             return list
         else:
             return 'not found any record'
     else:
-        dict = ms.get_all()
-        list = dict.values()
+        list = ms.get_all(page)
         return render_template('staff/staff.html', data=list, user=current_user)
 
 

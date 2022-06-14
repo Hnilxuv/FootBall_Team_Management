@@ -5,15 +5,15 @@ import football_team_manage.manage.roles.services as mr
 
 
 def get_list(current_user):
+    page = request.args.get('page', 1, type=int)
     if check_header():
-        list = mr.get_all()
+        list = mr.get_all(page)
         if list:
             return list
         else:
             return 'not found any record'
     else:
-        dict = mr.get_all()
-        list = dict.values()
+        list = mr.get_all(page)
         return render_template('roles/role.html', title='Role', data=list, user=current_user)
 
 

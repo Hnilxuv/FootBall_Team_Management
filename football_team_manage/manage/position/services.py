@@ -7,13 +7,16 @@ from football_team_manage.manage.validator import validate_data
 from football_team_manage.models.models import Position, Player
 
 
-def get_all():
-    positions = Position.query.all()
-    list = {}
-    for item in positions:
-        position = {'id': item.id, 'name': item.name, 'join_time': item.created_time}
-        list[item.id] = position
-    return list
+def get_all(page):
+    positions = Position.query.paginate(page=page, per_page=3)
+    if check_header():
+        list = {}
+        for item in positions.items:
+            position = {'id': item.id, 'name': item.name, 'join_time': item.created_time}
+            list[item.id] = position
+        return list
+    else:
+        return positions
 
 
 def get(id):
@@ -21,12 +24,9 @@ def get(id):
         data = request.json
     else:
         data = request.form.to_dict()
-    position = Position.query.filter_by(id=id).first()
-    if position:
-        data['name'] = position.name
-        return data
-    else:
-        return abort(404)
+    position = Position.query.filter_by(id=id).first_or_404()
+    data['name'] = position.name
+    return data
 
 
 def update(id):
@@ -34,38 +34,31 @@ def update(id):
         data = request.json
     else:
         data = request.form
-    position = Position.query.filter_by(id=id).first()
-
+    position = Position.query.filter_by(id=id).first_or_404()
     validator = validate_data(data)
-    if position:
-        if validator != True:
-            return validator
-        else:
-            position_check = Position.query.filter_by(name=data['name']).first()
-            if data['name'] != position.name:
-                if position_check:
-                    flash('That name is taken. Please choose a different one.', 'danger')
-                    return 'That name is taken. Please choose a different one.'
-            position.name = data['name']
-            db.session.commit()
-            flash('Update Successfully!', 'success')
-            return 'Update Successfully!'
+    if validator != True:
+        return validator
     else:
-        return abort(404)
+        position_check = Position.query.filter_by(name=data['name']).first()
+        if data['name'] != position.name:
+            if position_check:
+                flash('That name is taken. Please choose a different one.', 'danger')
+                return 'That name is taken. Please choose a different one.'
+        position.name = data['name']
+        db.session.commit()
+        flash('Update Successfully!', 'success')
+        return 'Update Successfully!'
 
 
 def delete(id):
-    position = Position.query.filter_by(id=id).first()
-    if position:
-        players = Player.query.filter_by(position_id=id).all()
-        db.session.delete(position)
-        for player in players:
-            db.session.delete(player)
-        db.session.commit()
-        flash('Delete successfully', 'success')
-        return 'Delete successfully!'
-    else:
-        return abort(404)
+    position = Position.query.filter_by(id=id).first_or_404()
+    players = Player.query.filter_by(position_id=id).all()
+    db.session.delete(position)
+    for player in players:
+        db.session.delete(player)
+    db.session.commit()
+    flash('Delete successfully', 'success')
+    return 'Delete successfully!'
 
 
 def add():
@@ -73,7 +66,6 @@ def add():
         data = request.json
     else:
         data = request.form
-
     validator = validate_data(data)
     if validator != True:
         flash('Add unsuccessfully', 'danger')

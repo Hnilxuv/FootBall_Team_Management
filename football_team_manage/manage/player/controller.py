@@ -5,15 +5,15 @@ import football_team_manage.manage.player.services as mp
 
 
 def get_list(current_user):
+    page = request.args.get('page', 1, type=int)
     if check_header():
-        list = mp.get_all()
+        list = mp.get_all(page)
         if list:
             return list
         else:
             return 'not found any record'
     else:
-        dict = mp.get_all()
-        list = dict.values()
+        list = mp.get_all(page)
         return render_template('player/player.html', title='Player', data=list, user=current_user)
 
 

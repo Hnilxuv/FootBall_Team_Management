@@ -7,16 +7,20 @@ from football_team_manage.manage.validator import validate_update_data, validate
 from football_team_manage.models.models import Roles, User
 
 
-def get_all():
-    manager_role = Roles.query.filter_by(name='manager').first()
-    manager_list = User.query.filter_by(role_id=manager_role.id).all()
-    list = {}
-    for item in manager_list:
-        manager = {'id': item.id, 'user_name': item.user_name, 'name': item.name, 'email': item.email,
-                   'phone': item.phone, 'created_time': item.created_time, 'status': item.status,
-                   'role_name': item.roles.name}
-        list[item.id] = manager
-    return list
+def get_all(page):
+    user = User.query.join(Roles).filter(Roles.name == 'Manager').order_by(-User.id) \
+        .paginate(page=page, per_page=3, error_out=True)
+    if check_header():
+        list = {}
+        for item in user.items:
+            manager = {'id': item.id, 'user_name': item.user_name, 'name': item.name, 'email': item.email,
+                       'phone': item.phone, 'created_time': item.created_time, 'status': item.status,
+                       'role_name': item.roles.name}
+            list[item.id] = manager
+        return list
+    else:
+
+        return user
 
 
 def get(id):
@@ -24,18 +28,14 @@ def get(id):
         data = request.get_json()
     else:
         data = request.form.to_dict()
-    role_check = Roles.query.filter_by(name='manager').first()
-    user = User.query.filter_by(id=id, role_id=role_check.id).first()
-    if user:
-        data['username'] = user.user_name
-        data['email'] = user.email
-        data['name'] = user.name
-        data['phone'] = user.phone
-        data['role_name'] = user.roles.name
-        data['status'] = user.status
-        return data
-    else:
-        return abort(404)
+    user = User.query.join(Roles).filter(User.id == id, Roles.name == 'Manager').first_or_404()
+    data['username'] = user.user_name
+    data['email'] = user.email
+    data['name'] = user.name
+    data['phone'] = user.phone
+    data['role_name'] = user.roles.name
+    data['status'] = user.status
+    return data
 
 
 def update(id):
@@ -43,49 +43,42 @@ def update(id):
         data = request.get_json()
     else:
         data = request.form
-    role_check = Roles.query.filter_by(name='manager').first()
-    user = User.query.filter_by(id=id, role_id=role_check.id).first()
+    user = User.query.join(Roles).filter(User.id == id, Roles.name == 'Manager').first_or_404()
     validator = validate_update_data(data)
-    if user:
-        if validator != True:
-            return validator
-        else:
-            user_change = User.query.filter_by(user_name=data['username']).first()
-            email_change = User.query.filter_by(email=data['email']).first()
-            role = Roles.query.filter_by(name=data['role_name']).first()
-            if data['username'] != user.user_name:
-                if user_change:
-                    flash('That username is taken. Please choose a different one.', 'danger')
-                    return 'That username is taken. Please choose a different one.'
-            if data['email'] != user.email:
-                if email_change:
-                    flash('That email is taken. Please choose a different one.', 'danger')
-                    return 'That email is taken. Please choose a different one.'
-            if not role:
-                return 'Invalid role name'
-            else:
-                if data['status'].lower() == 'true':
-                    status = True
-                elif data['status'].lower() == 'false':
-                    status = False
-                else:
-                    return 'invalid status'
-                user.user_name = data['username']
-                user.email = data['email']
-                user.phone = data['phone']
-                user.name = data['name']
-                user.role_id = role.id
-                user.status = status
-                db.session.commit()
-                flash('Update Successfully!', 'success')
-                return 'Update Successfully!'
+    if validator != True:
+        return validator
     else:
-        return abort(404)
+        user_change = User.query.filter_by(user_name=data['username']).first()
+        email_change = User.query.filter_by(email=data['email']).first()
+        role = Roles.query.filter_by(name=data['role_name']).first_or_404()
+        if data['username'] != user.user_name:
+            if user_change:
+                flash('That username is taken. Please choose a different one.', 'danger')
+                return 'That username is taken. Please choose a different one.'
+        if data['email'] != user.email:
+            if email_change:
+                flash('That email is taken. Please choose a different one.', 'danger')
+                return 'That email is taken. Please choose a different one.'
+        else:
+            if data['status'].lower() == 'true':
+                status = True
+            elif data['status'].lower() == 'false':
+                status = False
+            else:
+                return 'invalid status'
+            user.user_name = data['username']
+            user.email = data['email']
+            user.phone = data['phone']
+            user.name = data['name']
+            user.role_id = role.id
+            user.status = status
+            db.session.commit()
+            flash('Update Successfully!', 'success')
+            return 'Update Successfully!'
 
 
 def delete(id):
-    role_check = Roles.query.filter_by(name='manager').first()
-    user = User.query.filter_by(id=id, role_id=role_check.id).first()
+    user = User.query.join(Roles).filter(User.id == id, Roles.name == 'Manager').first()
     if user:
         db.session.delete(user)
         db.session.commit()
@@ -101,7 +94,6 @@ def add():
             data = request.get_json()
         else:
             data = request.form
-
         validator = validate_insert_data(data)
         if validator != True:
             return validator
@@ -114,7 +106,7 @@ def add():
             email = data['email']
             phone = data['phone']
             status = True
-            role = Roles.query.filter_by(name='manager').first()
+            role = Roles.query.filter_by(name='manager').first_or_404()
             user_name = User.query.filter_by(user_name=username).first()
             user_email = User.query.filter_by(email=email).first()
             if user_name:

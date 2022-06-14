@@ -5,15 +5,15 @@ import football_team_manage.manage.league.services as ml
 
 
 def get_list(current_user):
+    page = request.args.get('page', 1, type=int)
     if check_header():
-        list = ml.get_all()
+        list = ml.get_all(page)
         if list:
             return list
         else:
             return 'not found any record'
     else:
-        dict = ml.get_all()
-        list = dict.values()
+        list = ml.get_all(page)
         return render_template('league/league.html', title='Leagues', data=list, user=current_user)
 
 
