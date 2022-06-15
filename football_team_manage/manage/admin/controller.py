@@ -15,7 +15,7 @@ def get_list(current_user):
     else:
         list = ma.get_all(page)
 
-        return render_template('admin/admin.html', data=list, user=current_user)
+        return render_template('admin/admin.html', title='Administrator', data=list, user=current_user)
 
 
 def update(current_user, id):

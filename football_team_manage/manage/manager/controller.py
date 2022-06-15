@@ -14,7 +14,7 @@ def get_list(current_user):
             return 'not found any record'
     else:
         list = mm.get_all(page)
-        return render_template('manager/manager.html', data=list, user=current_user)
+        return render_template('manager/manager.html', title='Manager', data=list, user=current_user)
 
 
 def update(current_user, id):

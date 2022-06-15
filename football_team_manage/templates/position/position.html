@@ -15,7 +15,7 @@
         {% endif %}
         {% endwith %}
 {% if user.roles.name != 'register user' %}
-<h2>Manage <b>League</b>  <a href="/position/insert" class="btn btn-success float-right" >Add New Position</a> </h2>
+<h2>Manage <b>Position</b>  <a href="/position/insert" class="btn btn-success float-right" >Add New Position</a> </h2>
 <table class="table">
     <tr class="table_header">
         <th>Name</th>
@@ -25,7 +25,7 @@
     {% for row in data.items %}
     <tr class="table_row">
         <td>{{row['name']}}</td>
-        <td>{{row['join_time']}}</td>
+        <td>{{row.created_time}}</td>
         <td>
             <a href="/position/update/{{row['id']}}" class="btn btn-warning btn-xs">Edit</a>
             <a href="/position/delete/{{row['id']}}" class="btn btn-danger btn-xs"
@@ -36,7 +36,7 @@
     {% endfor %}
 </table>
 {% else %}
-<h2>Manage <b>League</b> </h2>
+<h2>Manage <b>Position</b> </h2>
 <table class="table">
     <tr class="table_header">
         <th>Name</th>
@@ -46,7 +46,7 @@
     {% for row in data.items %}
     <tr class="table_row">
         <td>{{row['name']}}</td>
-        <td>{{row['join_time']}}</td>
+        <td>{{row.created_time}}</td>
 
     </tr>
 

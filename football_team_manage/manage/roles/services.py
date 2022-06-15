@@ -6,7 +6,7 @@ from football_team_manage.models.models import Roles, User
 
 
 def get_all(page):
-    roles = Roles.query.paginate(page=page, per_page=3)
+    roles = Roles.query.order_by(-Roles.id).paginate(page=page, per_page=3)
     if check_header():
         list = {}
         for item in roles.items:

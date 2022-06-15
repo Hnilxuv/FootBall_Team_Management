@@ -8,7 +8,7 @@ from football_team_manage.models.models import Position, Player
 
 
 def get_all(page):
-    positions = Position.query.paginate(page=page, per_page=3)
+    positions = Position.query.order_by(-Position.id).paginate(page=page, per_page=3)
     if check_header():
         list = {}
         for item in positions.items:

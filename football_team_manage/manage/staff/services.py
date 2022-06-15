@@ -8,7 +8,7 @@ from football_team_manage.models.models import Roles, User
 
 
 def get_all(page):
-    user = User.query.join(Roles).filter(Roles.name == 'register user').order_by(-User.id) \
+    user = User.query.join(Roles).filter(Roles.name == 'staff').order_by(-User.id) \
         .paginate(page=page, per_page=3, error_out=True)
     if check_header():
         list = {}

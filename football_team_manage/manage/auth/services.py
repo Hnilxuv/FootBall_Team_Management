@@ -70,7 +70,6 @@ def signin():
                 return 'Login Unsuccessful. This account is banned'
             token = jwt.encode({'id': user_login.id, 'exp': datetime.utcnow() + timedelta(days=1)},
                                app.config['SECRET_KEY'])
-            session['current_user'] = user_login
             return token
     except:
         flash('Login Unsuccessful. Please check email and password', 'danger')

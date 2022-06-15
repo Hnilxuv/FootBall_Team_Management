@@ -14,7 +14,7 @@ def get_list(current_user):
             return 'not found any record'
     else:
         list = ms.get_all(page)
-        return render_template('staff/staff.html', data=list, user=current_user)
+        return render_template('staff/staff.html', title='Staff', data=list, user=current_user)
 
 
 def update(current_user, id):

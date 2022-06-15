@@ -14,7 +14,7 @@ def get_list(current_user):
             return 'not found any record'
     else:
         list = mru.get_all(page)
-        return render_template('register_user/register_user.html', data=list, user=current_user)
+        return render_template('register_user/register_user.html',title='Register User', data=list, user=current_user)
 
 
 def update(current_user, id):

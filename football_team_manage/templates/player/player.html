@@ -31,7 +31,7 @@
         <td>{{row['shirt_number']}}</td>
         <td>{{row['age']}}</td>
         <td>{{row['join_time']}}</td>
-        <td>{{row['position_name']}}</td>
+        <td>{{row.position.name}}</td>
         <td>
             <a href="/player/update/{{row['id']}}" class="btn btn-warning btn-xs">Edit</a>
             <a href="/player/delete/{{row['id']}}" class="btn btn-danger btn-xs"
@@ -56,11 +56,12 @@
         <td>{{row['shirt_number']}}</td>
         <td>{{row['age']}}</td>
         <td>{{row['join_time']}}</td>
-        <td>{{row['position_name']}}</td>
+        <td>{{row.position.name}}</td>
     </tr>
     {% endfor %}
 </table>
 {% endif %}
+<br>
 <ul class="pagination">
   {% if data.has_prev %}
    <li class="page-item"><a class="page-link" href="{{ url_for('player.get_all_player', page=data.prev_num) }}">Previous</a></li>

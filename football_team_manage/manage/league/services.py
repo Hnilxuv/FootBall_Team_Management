@@ -6,7 +6,7 @@ from football_team_manage.models.models import LeagueJoin
 
 
 def get_all(page):
-    leagues = LeagueJoin.query.paginate(page=page, per_page=3)
+    leagues = LeagueJoin.query.order_by(-LeagueJoin.id).paginate(page=page, per_page=3)
     if check_header():
         list = {}
         for item in leagues.items:
