@@ -1,6 +1,6 @@
 import jwt
 from werkzeug.security import generate_password_hash, check_password_hash
-from flask import flash, request
+from flask import flash, request, session
 from football_team_manage.manage.middleware import check_header
 from football_team_manage.models.models import User, Roles
 from datetime import datetime, timedelta
@@ -70,6 +70,7 @@ def signin():
                 return 'Login Unsuccessful. This account is banned'
             token = jwt.encode({'id': user_login.id, 'exp': datetime.utcnow() + timedelta(days=1)},
                                app.config['SECRET_KEY'])
+            session['current_user'] = user_login
             return token
     except:
         flash('Login Unsuccessful. Please check email and password', 'danger')
