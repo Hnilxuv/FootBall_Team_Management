@@ -14,10 +14,15 @@
         {% endfor %}
         {% endif %}
         {% endwith %}
-{% if user.roles.name != 'register user' %}
+
 <div class="row">
     <div class="col-12"><H2>Manage Player</H2></div>
 </div>
+{% if not data.items %}
+    <p class="mt-3"> No record is found!
+</p>
+{% else %}
+{% if user.roles.name != 'register user' %}
 <div class="row">
   <div class="col-9">
    <form action="" method="post" autocomplete="off">
@@ -62,9 +67,6 @@
 </table>
 {% else %}
 <div class="row">
-    <div class="col-12"><H2>Manage Player</H2></div>
-</div>
-<div class="row">
   <div class="col-9">
    <form action="" method="post" autocomplete="off">
    <div class="row">
@@ -76,7 +78,6 @@
     </div>
    </div>
    </form>
-
    </div>
   </div>
 <br>
@@ -123,4 +124,5 @@
     <p class="mt-3">
    Page {{ data.page }} / {{ data.pages }}
 </p>
+{% endif %}
 {% endblock content %}

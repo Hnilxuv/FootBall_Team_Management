@@ -21,7 +21,7 @@ def get_all(page):
 
 
 def get_search(page, search):
-    players = Player.query.order_by(-Player.id, Player.name.contains(search)).paginate(page=page, per_page=3)
+    players = Player.query.filter(Player.name.contains(search)).order_by(-Player.id).paginate(page=page, per_page=3)
     if check_header():
         list = {}
         for item in players.items:
@@ -62,14 +62,13 @@ def update(id):
             if shirt_no:
                 flash('That shirt number is taken. Please choose a different one!', 'danger')
                 return 'That shirt number is taken. Please choose a different one!'
-        else:
-            player.name = data['name']
-            player.age = data['age']
-            player.shirt_number = data['shirt_number']
-            player.position_id = position.id
-            db.session.commit()
-            flash('Update successfully!', 'success')
-            return 'Update successfully!', 200
+        player.name = data['name']
+        player.age = data['age']
+        player.shirt_number = data['shirt_number']
+        player.position_id = position.id
+        db.session.commit()
+        flash('Update successfully!', 'success')
+        return 'Update successfully!', 200
 
 
 def add():

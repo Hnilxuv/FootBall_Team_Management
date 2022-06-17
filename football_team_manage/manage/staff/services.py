@@ -1,5 +1,4 @@
 from flask import request, flash
-from werkzeug.exceptions import abort
 from werkzeug.security import generate_password_hash
 from football_team_manage import db
 from football_team_manage.manage.middleware import check_header
@@ -35,6 +34,7 @@ def get_search(page, search):
         return list
     else:
         return user
+
 
 def get(id):
     if check_header():
@@ -72,32 +72,31 @@ def update(id, current_user):
             if email_change:
                 flash('That email is taken. Please choose a different one.', 'danger')
                 return 'That email is taken. Please choose a different one.'
+        if data['status'].lower() == 'true':
+            status = True
+        elif data['status'].lower() == 'false':
+            status = False
         else:
-            if data['status'].lower() == 'true':
-                status = True
-            elif data['status'].lower() == 'false':
-                status = False
-            else:
-                return 'invalid status'
-            if current_user.roles.name != 'manager':
-                user.user_name = data['username']
-                user.email = data['email']
-                user.phone = data['phone']
-                user.name = data['name']
-                user.role_id = role.id
-                user.status = status
-                db.session.commit()
-                flash('Update Successfully!', 'success')
-                return 'Update Successfully!'
-            else:
-                user.user_name = data['username']
-                user.email = data['email']
-                user.phone = data['phone']
-                user.name = data['name']
-                user.status = status
-                db.session.commit()
-                flash('Update Successfully!', 'success')
-                return 'Update Successfully!'
+            return 'invalid status'
+        if current_user.roles.name != 'manager':
+            user.user_name = data['username']
+            user.email = data['email']
+            user.phone = data['phone']
+            user.name = data['name']
+            user.role_id = role.id
+            user.status = status
+            db.session.commit()
+            flash('Update Successfully!', 'success')
+            return 'Update Successfully!'
+        else:
+            user.user_name = data['username']
+            user.email = data['email']
+            user.phone = data['phone']
+            user.name = data['name']
+            user.status = status
+            db.session.commit()
+            flash('Update Successfully!', 'success')
+            return 'Update Successfully!'
 
 
 def add():

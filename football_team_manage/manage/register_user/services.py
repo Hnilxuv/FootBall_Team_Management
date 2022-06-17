@@ -67,7 +67,7 @@ def update(id, current_user):
     else:
         role = Roles.query.filter_by(name=data['role_name']).first_or_404()
         user_change = User.query.filter_by(user_name=data['username']).first()
-        email_change = User.query.filter_by(user_name=data['email']).first()
+        email_change = User.query.filter_by(email=data['email']).first()
         if data['username'] != user.user_name:
             if user_change:
                 flash('That username is taken. Please choose a different one.', 'danger')
@@ -76,32 +76,31 @@ def update(id, current_user):
             if email_change:
                 flash('That email is taken. Please choose a different one.', 'danger')
                 return 'That email is taken. Please choose a different one.'
+        if data['status'].lower() == 'true':
+            status = True
+        elif data['status'].lower() == 'false':
+            status = False
         else:
-            if data['status'].lower() == 'true':
-                status = True
-            elif data['status'].lower() == 'false':
-                status = False
-            else:
-                return 'invalid status'
-            if current_user.roles.name != 'manager':
-                user.user_name = data['username']
-                user.email = data['email']
-                user.phone = data['phone']
-                user.name = data['name']
-                user.role_id = role.id
-                user.status = status
-                db.session.commit()
-                flash('Update Successfully!', 'success')
-                return 'Update Successfully!'
-            else:
-                user.user_name = data['username']
-                user.email = data['email']
-                user.phone = data['phone']
-                user.name = data['name']
-                user.status = status
-                db.session.commit()
-                flash('Update Successfully!', 'success')
-                return 'Update Successfully!', 200
+            return 'invalid status'
+        if current_user.roles.name != 'manager':
+            user.user_name = data['username']
+            user.email = data['email']
+            user.phone = data['phone']
+            user.name = data['name']
+            user.role_id = role.id
+            user.status = status
+            db.session.commit()
+            flash('Update Successfully!', 'success')
+            return 'Update Successfully!'
+        else:
+            user.user_name = data['username']
+            user.email = data['email']
+            user.phone = data['phone']
+            user.name = data['name']
+            user.status = status
+            db.session.commit()
+            flash('Update Successfully!', 'success')
+            return 'Update Successfully!', 200
 
 
 def add():

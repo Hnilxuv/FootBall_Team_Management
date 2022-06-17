@@ -74,22 +74,21 @@ def update(id):
             if email_change:
                 flash('That email is taken. Please choose a different one.', 'danger')
                 return 'That email is taken. Please choose a different one.'
+        if data['status'].lower() == 'true':
+            status = True
+        elif data['status'].lower() == 'false':
+            status = False
         else:
-            if data['status'].lower() == 'true':
-                status = True
-            elif data['status'].lower() == 'false':
-                status = False
-            else:
-                return 'invalid status'
-            user.user_name = data['username']
-            user.email = data['email']
-            user.phone = data['phone']
-            user.name = data['name']
-            user.role_id = role.id
-            user.status = status
-            db.session.commit()
-            flash('Update Successfully!', 'success')
-            return 'Update Successfully!'
+            return 'invalid status'
+        user.user_name = data['username']
+        user.email = data['email']
+        user.phone = data['phone']
+        user.name = data['name']
+        user.role_id = role.id
+        user.status = status
+        db.session.commit()
+        flash('Update Successfully!', 'success')
+        return 'Update Successfully!'
 
 
 def delete(id):
