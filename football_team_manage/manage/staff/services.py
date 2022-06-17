@@ -22,6 +22,20 @@ def get_all(page):
         return user
 
 
+def get_search(page, search):
+    user = User.query.join(Roles).filter(Roles.name == 'staff', User.user_name.contains(search)).order_by(-User.id) \
+        .paginate(page=page, per_page=3, error_out=True)
+    if check_header():
+        list = {}
+        for item in user.items:
+            user = {'id': item.id, 'user_name': item.user_name, 'name': item.name, 'email': item.email,
+                    'phone': item.phone, 'created_time': item.created_time, 'status': item.status,
+                    'role_name': item.roles.name}
+            list[item.id] = user
+        return list
+    else:
+        return user
+
 def get(id):
     if check_header():
         data = request.json

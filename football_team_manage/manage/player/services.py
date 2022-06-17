@@ -20,6 +20,19 @@ def get_all(page):
         return players
 
 
+def get_search(page, search):
+    players = Player.query.order_by(-Player.id, Player.name.contains(search)).paginate(page=page, per_page=3)
+    if check_header():
+        list = {}
+        for item in players.items:
+            player = {'id': item.id, 'name': item.name, 'shirt_number': item.shirt_number,
+                      'age': item.age, 'join_time': item.join_time, 'position_name': item.position.name}
+            list[item.id] = player
+        return list
+    else:
+        return players
+
+
 def get(id):
     if check_header():
         data = request.json

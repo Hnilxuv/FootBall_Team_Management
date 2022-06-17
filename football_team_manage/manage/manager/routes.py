@@ -5,7 +5,7 @@ from football_team_manage.manage.middleware import token_required, has_permissio
 manager = Blueprint('manager', __name__)
 
 
-@manager.route('/manager')
+@manager.route('/manager', methods=['GET', 'POST'])
 @token_required
 @has_permission(["admin"])
 def get_all_manager(current_user):

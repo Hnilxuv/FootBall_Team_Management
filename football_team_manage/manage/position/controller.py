@@ -6,15 +6,30 @@ import football_team_manage.manage.position.services as mp
 
 def get_list(current_user):
     page = request.args.get('page', 1, type=int)
-    if check_header():
-        list = mp.get_all(page)
-        if list:
-            return list
+    if request.method == 'GET':
+        if check_header():
+            list = mp.get_all(page)
+            if list:
+                return list
+            else:
+                return 'not found any record'
         else:
-            return 'not found any record'
+            list = mp.get_all(page)
+            return render_template('position/position.html', title='Position', data=list, user=current_user)
     else:
-        list = mp.get_all(page)
-        return render_template('position/position.html', title='Position', data=list, user=current_user)
+        if check_header():
+            data = request.get_json()
+            search = data['search']
+            list = mp.get_search(page, search)
+            if list:
+                return list
+            else:
+                return 'not found any record'
+        else:
+            data = request.form
+            search = data['search']
+            list = mp.get_search(page, search)
+            return render_template('position/position.html', title='Position', data=list, user=current_user, search=search)
 
 
 def update(current_user, id):

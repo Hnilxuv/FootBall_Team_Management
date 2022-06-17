@@ -14,7 +14,28 @@
         {% endif %}
         {% endwith %}
 
-<h2>Manage <b>Manager</b>  <a href="/manager/insert" class="btn btn-success float-right" >Add New Manager</a> </h2>
+<div class="row">
+    <div class="col-12"><H2>Manage Manager</H2></div>
+</div>
+<div class="row">
+  <div class="col-9">
+   <form action="" method="post" autocomplete="off">
+   <div class="row">
+    <div class="col-8">
+    <input type="text" class="form-control" name="search" id="search" value="{{search}}"  placeholder="Search..."/>
+    </div>
+    <div class="col-2" align="left">
+    <input type="submit" value="Search" class="form-control btn btn-primary " name="">
+    </div>
+   </div>
+   </form>
+
+   </div>
+    <div class="col-3" align="right">
+    <a href="/manager/insert" class="btn btn-success" >Add New Manager</a>
+        </div>
+  </div>
+<br>
 <table class="table">
     <tr class="table_header">
 
@@ -47,12 +68,12 @@
 
 <ul class="pagination">
   {% if data.has_prev %}
-   <li class="page-item"><a class="page-link" href="{{ url_for('manager.get_all_manager', page=data.prev_num) }}">Previous</a></li>
+   <li class="page-item"><a class="page-link" href="{{ url_for('manager.get_all_manager', page=data.prev_num) }}"><<</a></li>
   {% else %}
-   <li class="page-item disabled"><span class="page-link">Previous</span>
+   <li class="page-item disabled"><span class="page-link"><<</span>
   {% endif %}
    </li>
-  {% for page in data.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
+  {% for page in data.iter_pages(left_edge=1, right_edge=1, left_current=1, right_current=2) %}
   {% if page %}
    <li class="page-item"><a class="page-link" href="{{ url_for('manager.get_all_manager', page=page) }}">{{ page }}</a></li>
   {% else %}
@@ -60,9 +81,12 @@
   {% endif %}
   {% endfor %}
   {% if data.has_next %}
-   <li class="page-item"><a class="page-link" href="{{ url_for('manager.get_all_manager', page=data.next_num) }}">Next</a></li>
+   <li class="page-item"><a class="page-link" href="{{ url_for('manager.get_all_manager', page=data.next_num) }}">>></a></li>
   {% else %}
-   <li class="page-item disabled"><span class="page-link">Next</span>
+   <li class="page-item disabled"><span class="page-link">>></span>
   {% endif %}
    </ul>
+<p class="mt-3">
+   Page {{ data.page }} / {{ data.pages }}
+</p>
 {% endblock content %}

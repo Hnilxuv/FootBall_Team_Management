@@ -1,6 +1,6 @@
 from functools import wraps
 import jwt
-from flask import request, url_for, make_response, redirect
+from flask import request, url_for, make_response, redirect, jsonify
 from werkzeug.exceptions import abort
 
 from football_team_manage import app
@@ -25,12 +25,12 @@ def token_required(f):
                 bearer = headers.get('Authorization')
                 token = bearer.split()[1]
             if not token:
-                return 'missing token'
+                return make_response(jsonify({"message": "A valid token is missing!"}), 401)
             try:
                 data = jwt.decode(token, app.config['SECRET_KEY'])
                 current_user = User.query.filter_by(id=data['id']).first()
             except:
-                return 'wrong token'
+                return make_response(jsonify({"message": "Invalid token!"}), 401)
         else:
             if 'token' in request.cookies:
                 token = request.cookies.get('token')

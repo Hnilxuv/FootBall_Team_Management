@@ -19,6 +19,18 @@ def get_all(page):
         return positions
 
 
+def get_search(page, search):
+    positions = Position.query.filter(Position.name.contains(search)).order_by(-Position.id).paginate(page=page, per_page=3)
+    if check_header():
+        list = {}
+        for item in positions.items:
+            position = {'id': item.id, 'name': item.name, 'join_time': item.created_time}
+            list[item.id] = position
+        return list
+    else:
+        return positions
+
+
 def get(id):
     if check_header():
         data = request.json

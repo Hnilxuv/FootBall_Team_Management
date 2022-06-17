@@ -17,6 +17,18 @@ def get_all(page):
         return leagues
 
 
+def get_search(page, search):
+    leagues = LeagueJoin.query.filter(LeagueJoin.name.contains(search)).order_by(-LeagueJoin.id).paginate(page=page, per_page=3)
+    if check_header():
+        list = {}
+        for item in leagues.items:
+            league = {'id': item.id, 'name': item.name, 'join_time': item.join_time}
+            list[item.id] = league
+        return list
+    else:
+        return leagues
+
+
 def get(id):
     if check_header():
         data = request.get_json()
