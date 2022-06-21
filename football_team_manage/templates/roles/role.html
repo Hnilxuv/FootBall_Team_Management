@@ -46,8 +46,12 @@
    </li>
   {% for page in data.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
   {% if page %}
-   <li class="page-item"><a class="page-link" href="{{ url_for('roles.get_all_role', page=page) }}">{{ page }}</a></li>
+    {% if page != data.page %}
+   <li class="page-item"><a class="page-link" href="{{ url_for('roles.get_all_role', page=page)}}">{{ page }}</a></li>
   {% else %}
+    <li class="page-item"><a class="page-link"><strong>{{ page }}</strong></a></li>
+    {% endif %}
+    {% else %}
    <li class="page-item disabled" id="example_ellipsis"><a href="#" class="page-link">…</a></li>
   {% endif %}
   {% endfor %}

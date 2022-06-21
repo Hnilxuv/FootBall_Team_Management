@@ -17,10 +17,7 @@
 <div class="row">
     <div class="col-12"><H2>Manage League</H2></div>
 </div>
-{% if not data.items %}
-    <p class="mt-3"> No record is found!
-</p>
-{% else %}
+
 {% if user.roles.name != 'register user' %}
 <div class="row">
   <div class="col-9">
@@ -41,6 +38,10 @@
         </div>
   </div>
 <br>
+{% if not data.items %}
+    <p class="mt-3"> No record is found!
+</p>
+{% else %}
 <table class="table">
     <tr class="table_header">
         <th>Name</th>
@@ -60,6 +61,35 @@
 
     {% endfor %}
 </table>
+<br>
+<ul class="pagination">
+  {% if data.has_prev %}
+   <li class="page-item"><a class="page-link" href="{{ url_for('league.get_all_league', page=data.prev_num) }}"><<</a></li>
+  {% else %}
+   <li class="page-item disabled"><span class="page-link"><<</span>
+  {% endif %}
+   </li>
+  {% for page in data.iter_pages(left_edge=1, right_edge=1, left_current=1, right_current=2) %}
+  {% if page %}
+    {% if page != data.page %}
+   <li class="page-item"><a class="page-link" href="{{ url_for('league.get_all_league', page=page) }}">{{ page }}</a></li>
+  {% else %}
+    <li class="page-item"><a class="page-link"><strong>{{ page }}</strong></a></li>
+    {% endif %}
+    {% else %}
+   <li class="page-item disabled" id="example_ellipsis"><a href="#" class="page-link">…</a></li>
+  {% endif %}
+  {% endfor %}
+  {% if data.has_next %}
+   <li class="page-item"><a class="page-link" href="{{ url_for('league.get_all_league', page=data.next_num) }}">>></a></li>
+  {% else %}
+   <li class="page-item disabled"><span class="page-link">>></span>
+  {% endif %}
+   </ul>
+    <p class="mt-3">
+   Page {{ data.page }} / {{ data.pages }}
+</p>
+{% endif %}
 {% else %}
 <div class="row">
   <div class="col-9">
@@ -76,6 +106,10 @@
    </div>
   </div>
 <br>
+{% if not data.items %}
+    <p class="mt-3"> No record is found!
+</p>
+{% else %}
 <table class="table">
     <tr class="table_header">
         <th>Name</th>
@@ -89,9 +123,9 @@
 
     {% endfor %}
 </table>
-{% endif %}
-<br>
 
+
+<br>
 <ul class="pagination">
   {% if data.has_prev %}
    <li class="page-item"><a class="page-link" href="{{ url_for('league.get_all_league', page=data.prev_num) }}"><<</a></li>
@@ -101,9 +135,13 @@
    </li>
   {% for page in data.iter_pages(left_edge=1, right_edge=1, left_current=1, right_current=2) %}
   {% if page %}
+    {% if page != data.page %}
    <li class="page-item"><a class="page-link" href="{{ url_for('league.get_all_league', page=page) }}">{{ page }}</a></li>
   {% else %}
-   <li class="page-item disabled" id="example_ellipsis"><a href="#" class="page-link">…</a></li>
+    <li class="page-item"><a class="page-link"><strong>{{ page }}</strong></a></li>
+    {% endif %}
+    {% else %}
+   <li class="page-item disabled" ><a href="#" class="page-link">…</a></li>
   {% endif %}
   {% endfor %}
   {% if data.has_next %}
@@ -115,5 +153,6 @@
     <p class="mt-3">
    Page {{ data.page }} / {{ data.pages }}
 </p>
+{% endif %}
 {% endif %}
 {% endblock content %}

@@ -1,12 +1,57 @@
 from football_team_manage.manage.form import UpdateUserForm, InsertionUserForm
 from football_team_manage.manage.middleware import check_header
 import football_team_manage.manage.admin.services as ma
-from flask import render_template, url_for, request, redirect
+from flask import render_template, url_for, request, redirect, session
+
+
+def get_search_data():
+    if check_header():
+        data = request.get_json()
+    else:
+        data = request.form
+    return data
+
+
+def check_search_data(page):
+    data = get_search_data()
+    if data:
+        if data['search'] != '':
+            if session.get('data_admin') is None:
+                session['data_admin'] = data
+                session['page'] = 1
+                return True
+            else:
+                if data == session['data_admin']:
+                    session['page'] = page
+                    return True
+                else:
+                    if page == 1:
+                        session.pop('data_admin', None)
+                        session['data_admin'] = data
+                        return True
+                    else:
+                        session.pop('data_admin', None)
+                        session['data_admin'] = data
+                        session['page'] = '1'
+                        return True
+        else:
+            session.pop('data_admin', None)
+            return False
+    else:
+        if session.get('data_admin') is None:
+            return False
+        else:
+            if page == 1:
+                session['page'] = page
+            else:
+                session.pop('page', None)
+                session['page'] = page
+            return True
 
 
 def get_list(current_user):
     page = request.args.get('page', 1, type=int)
-    if request.method == 'GET':
+    if not check_search_data(page):
         if check_header():
             list = ma.get_all(page)
             if list:
@@ -18,17 +63,19 @@ def get_list(current_user):
             return render_template('admin/admin.html', title='Administrator', data=list, user=current_user)
     else:
         if check_header():
-            data = request.get_json()
+            data = session.get('data_admin')
             search = data['search']
-            list = ma.get_search(page, search)
+            page_session = session.get('page')
+            list = ma.get_search(int(page_session), search)
             if list:
                 return list
             else:
                 return 'not found any record'
         else:
-            data = request.form
+            data = session.get('data_admin')
             search = data['search']
-            list = ma.get_search(page, search)
+            page_session = session.get('page')
+            list = ma.get_search(int(page_session), search)
             return render_template('admin/admin.html', title='Administrator', data=list, user=current_user,
                                    search=search)
 

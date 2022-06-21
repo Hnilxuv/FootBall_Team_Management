@@ -1,12 +1,54 @@
 from football_team_manage.manage.form import UpdateUserForm, InsertionUserForm, EditionUserForm
 from football_team_manage.manage.middleware import check_header
 import football_team_manage.manage.register_user.services as mru
-from flask import render_template, url_for, request, redirect
+from flask import render_template, url_for, request, redirect, session
+
+
+def get_search_data():
+    if check_header():
+        data = request.get_json()
+    else:
+        data = request.form
+    return data
+
+
+def check_search_data(page):
+    data = get_search_data()
+    if data:
+        if session.get('data_register_user') is None:
+            session['data_register_user'] = data
+            session['page'] = 1
+            return True
+        else:
+            if data == session['data_register_user']:
+                session['page'] = page
+                return True
+            else:
+                if page == 1:
+                    session.pop('data_register_user', None)
+                    session['data_register_user'] = data
+                    return True
+                else:
+                    session.pop('data_register_user', None)
+                    session['data_register_user'] = data
+                    session['page'] = '1'
+                    return True
+
+    else:
+        if session.get('data_register_user') is None:
+            return False
+        else:
+            if page == 1:
+                session['page'] = page
+            else:
+                session.pop('page', None)
+                session['page'] = page
+            return True
 
 
 def get_list(current_user):
     page = request.args.get('page', 1, type=int)
-    if request.method == 'GET':
+    if not check_search_data(page):
         if check_header():
             list = mru.get_all(page)
             if list:
@@ -15,20 +57,22 @@ def get_list(current_user):
                 return 'not found any record'
         else:
             list = mru.get_all(page)
-            return render_template('register_user/register_user.html',title='Register User', data=list, user=current_user)
+            return render_template('register_user/register_user.html', title='Register User', data=list, user=current_user)
     else:
         if check_header():
-            data = request.get_json()
+            data = session.get('data_register_user')
             search = data['search']
-            list = mru.get_search(page, search)
+            page_session = session.get('page')
+            list = mru.get_search(int(page_session), search)
             if list:
                 return list
             else:
                 return 'not found any record'
         else:
-            data = request.form
+            data = session.get('data_register_user')
             search = data['search']
-            list = mru.get_search(page, search)
+            page_session = session.get('page')
+            list = mru.get_search(int(page_session), search)
             return render_template('register_user/register_user.html', title='Register User', data=list,
                                    user=current_user, search=search)
 

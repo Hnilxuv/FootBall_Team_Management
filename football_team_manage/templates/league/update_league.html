@@ -38,7 +38,7 @@
         </fieldset>
         <div class="form-group">
             {{ form.submit(class="btn btn-outline-info") }}
-            <a class="btn btn-danger" href="/league">Cancel</a>
+            <a class="btn btn-danger" href="{{ url_for('league.get_all_league') }}">Cancel</a>
         </div>
     </form>
 </div>
