@@ -21,7 +21,7 @@ def check_search_data(page):
                 session['page'] = 1
                 return True
             else:
-                if data == session['data_admin']:
+                if data['search'] == session['data_admin']['search']:
                     session['page'] = page
                     return True
                 else:
